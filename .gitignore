@@ -41,7 +41,7 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-data/**
+data/*
 !data/config/
 sim/**
 
