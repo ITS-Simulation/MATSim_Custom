@@ -24,7 +24,9 @@ object MATSimMetadataStore {
 
         schedule.transitLines.values.forEach{ line ->
             line.routes.values.forEach { route ->
-                val routeLinks: List<Id<Link>> = route.route.linkIds
+                val routeLinks: List<Id<Link>> = listOf(route.route.startLinkId) + 
+                    route.route.linkIds + 
+                    listOf(route.route.endLinkId)
                 val departures: List<Double> = route.departures.values.map { it.departureTime }.sorted()
 
                 if (departures.isNotEmpty()) {
@@ -107,13 +109,21 @@ object MATSimMetadataStore {
 
         // Extract bus route information
         val busRoutes = mutableMapOf<Id<TransitLine>, MutableList<BusRouteMetadata>>()
-        schedule.transitLines.forEach { (id, line) ->
+        schedule.transitLines
+            .filter { (_, line) ->
+                line.routes.values.any { route ->
+                    modes.any { mode -> "${route.transportMode}" == mode }
+                }
+            }.forEach { (id, line) ->
             line.routes.forEach { (_, route) ->
-                val routeLinks: List<Id<Link>> = route.route.linkIds
+                val fullRoute: List<Id<Link>> = route.route.linkIds.toMutableList().apply {
+                    addFirst(route.route.startLinkId)
+                    add(route.route.endLinkId)
+                }
                 val routeStops: Set<Id<TransitStopFacility>>
                     = route.stops.map { it.stopFacility.id }.toSet()
                 busRoutes.getOrPut(id) { mutableListOf() }.add(
-                    BusRouteMetadata(route = routeLinks, stops = routeStops)
+                    BusRouteMetadata(route = fullRoute, stops = routeStops)
                 )
             }
         }

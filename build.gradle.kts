@@ -32,6 +32,7 @@ dependencies {
     implementation("org.apache.arrow:arrow-memory-netty:18.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.github.ajalt.clikt:clikt:5.0.3")
+    implementation("org.duckdb:duckdb_jdbc:1.4.3.0")
 }
 
 application {

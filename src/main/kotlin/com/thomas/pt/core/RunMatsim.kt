@@ -100,45 +100,45 @@ object RunMatsim {
             transitVehicles = controller.scenario.transitVehicles,
         )
 
-        val lastIteration = matsimConfig.controller().lastIteration
-
-        val arrowBatchConfig = Utility.getYamlSubconfig(yamlConfig, "arrow").let{
-            it["batch_size"] as Int
-        }
-
-        val dataOutConfig = Utility.getYamlSubconfig(yamlConfig, "files", "data")
-        val linkDataOut = Path(dataOutConfig["link_records"] as String).apply {
-            parent.toFile().mkdirs()
-        }
-        val busDelayDataOut = Path(dataOutConfig["stop_records"] as String).apply {
-            parent.toFile().mkdirs()
-        }
-        MATSimEventWriter(
-            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-            batchSize = arrowBatchConfig,
-            linkDataPath = linkDataOut,
-            busDelayDataPath = busDelayDataOut
-        ).use { eventWriter ->
-            val linkHandler = LinkEventHandler(
-                targetIter = lastIteration,
-                eventWriter = eventWriter
-            )
-
-            val busDelayHandler = BusDelayHandler(
-                targetIter = lastIteration,
-                eventWriter = eventWriter
-            )
-
-            controller.addOverridingModule(
-                object: AbstractModule() {
-                    override fun install() {
-                        this.addEventHandlerBinding().toInstance(linkHandler)
-                        this.addEventHandlerBinding().toInstance(busDelayHandler)
-                    }
-                }
-            )
-
-            controller.run()
-        }
+//        val lastIteration = matsimConfig.controller().lastIteration
+//
+//        val arrowBatchConfig = Utility.getYamlSubconfig(yamlConfig, "arrow").let{
+//            it["batch_size"] as Int
+//        }
+//
+//        val dataOutConfig = Utility.getYamlSubconfig(yamlConfig, "files", "data")
+//        val linkDataOut = Path(dataOutConfig["link_records"] as String).apply {
+//            parent.toFile().mkdirs()
+//        }
+//        val busDelayDataOut = Path(dataOutConfig["stop_records"] as String).apply {
+//            parent.toFile().mkdirs()
+//        }
+//        MATSimEventWriter(
+//            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+//            batchSize = arrowBatchConfig,
+//            linkDataPath = linkDataOut,
+//            busDelayDataPath = busDelayDataOut
+//        ).use { eventWriter ->
+//            val linkHandler = LinkEventHandler(
+//                targetIter = lastIteration,
+//                eventWriter = eventWriter
+//            )
+//
+//            val busDelayHandler = BusDelayHandler(
+//                targetIter = lastIteration,
+//                eventWriter = eventWriter
+//            )
+//
+//            controller.addOverridingModule(
+//                object: AbstractModule() {
+//                    override fun install() {
+//                        this.addEventHandlerBinding().toInstance(linkHandler)
+//                        this.addEventHandlerBinding().toInstance(busDelayHandler)
+//                    }
+//                }
+//            )
+//
+//            controller.run()
+//        }
     }
 }

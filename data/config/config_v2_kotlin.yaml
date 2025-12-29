@@ -25,6 +25,10 @@ bus:
   standing: 20
   cap_headroom: 0.5 # 50% headroom for standing passengers
 
+processing:
+  exclude_lines:  # Lines to exclude from analysis (empty list = include all)
+    - "Wenden"
+
 scoring:
   wait_ride:
     elas: -0.4

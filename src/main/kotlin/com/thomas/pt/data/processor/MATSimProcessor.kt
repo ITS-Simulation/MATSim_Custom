@@ -7,10 +7,13 @@ import org.jetbrains.kotlinx.dataframe.AnyRow
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readArrowIPC
+import org.jetbrains.kotlinx.dataframe.io.writeCsv
 import org.matsim.api.core.v01.Id
 import org.matsim.api.core.v01.network.Link
 import org.matsim.pt.transitSchedule.api.TransitLine
+import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.Path
 
 class MATSimProcessor(configPath: Path) {
     private val linkDataFrame: AnyFrame
@@ -258,8 +261,8 @@ class MATSimProcessor(configPath: Path) {
         }
 
         private fun interpolateEWTForLink(
-            dfInterpolated: AnyFrame,
-        ): AnyFrame = dfInterpolated
+            dfLineInterpolated: AnyFrame,
+        ): AnyFrame = dfLineInterpolated
             .add("weight") {
                 metadata.linesHeadway[Id.create(
                     "line_id"<String>(), TransitLine::class.java
@@ -272,35 +275,65 @@ class MATSimProcessor(configPath: Path) {
                 sum("weight") into "weight_sum"
                 mean("ewt") into "mean_ewt"
             }
-            .add("ewt") {
+            .add("interpolated_ewt") {
                 if ("weight_sum"<Double>() > 0)
                     "weighted_ewt_sum"<Double>() / "weight_sum"<Double>()
                 else "mean_ewt"()
             }
-            .select("link_id", "ewt")
+            .select("link_id", "interpolated_ewt")
 
-//        fun process(): AnyFrame {
-//            val dfEWTPerLine = ewtAggregation(dfWithEWT, "link_id", "line_id")
-//            val dfEWTPerLink = ewtAggregation(dfWithEWT, "link_id")
-//                .rename("ewt" to "measured_ewt")
-//
-//            val ewtLineMap = dfEWTPerLine
-//                .rows()
-//                .groupBy { it["link_id"] as String }
-//                .mapValues { (_, rows) ->
-//                    rows.associate { row ->
-//                        row["line_id"] as String to row["ewt"] as Double
-//                    }
-//                }
-//
-//            val ewtLinkMap = dfEWTPerLink
-//                .rows()
-//                .associate { row ->
-//                    row["link_id"] as String to row["measured_ewt"] as Double
-//                }
-//
-//            val interpolatedPerLine = interpolateEWTForLine(ewtLineMap)
-//            val interpolatedPerLink = interpolateEWTForLink(interpolatedPerLine)
-//        }
+        fun process(): AnyFrame {
+            val dfEWTPerLine = ewtAggregation(dfWithEWT, "link_id", "line_id")
+            val dfEWTPerLink = ewtAggregation(dfWithEWT, "link_id")
+                .rename("ewt" to "measured_ewt")
+
+            val dfEWTLine = dfEWTPerLine.rows()
+                .groupBy { it["link_id"] as String }
+                .mapValues { (_, rows) ->
+                    rows.associate { row ->
+                        row["line_id"] as String to row["ewt"] as Double
+                    }
+                }
+                .let { interpolateEWTForLine(it) }
+
+            val dfEWTLinkInterpolated = interpolateEWTForLink(dfEWTLine)
+
+            val dfEWTLink = dfEWTLinkInterpolated
+                .leftJoin(dfEWTPerLink, "link_id")
+                .add("ewt") {
+                    @Suppress("RemoveExplicitTypeArguments")
+                    "measured_ewt"<Double?>() ?: "interpolated_ewt"<Double>()
+                }
+                .select("link_id", "ewt")
+
+            val busLineEWTMap = dfEWTLine.rows()
+                .groupBy { it["link_id"] as String }
+                .mapValues { (_, rows) ->
+                    rows.associate { row ->
+                        row["line_id"] as String to row["ewt"] as Double
+                    }
+                }
+
+            return dfEWTLink
+                .add("line_ewt") { busLineEWTMap["link_id"()] ?: emptyMap() }
+        }
+    }
+
+    fun processAll() {
+        val avgTripLength = processAvgTripLength()
+        println("Average Trip Length: $avgTripLength")
+
+        val avgLoadFactorDF = ProcessAvgLoadFactor().process()
+        System.gc()
+        val vehicleFlowDF = ProcessVehicleFlow().process()
+        System.gc()
+        val ewtDF = ProcessEWT().process()
+        System.gc()
+
+        val out = File("data/out/merged_los.csv").apply { parentFile.mkdirs() }
+        val losData = avgLoadFactorDF
+            .leftJoin(vehicleFlowDF, "link_id")
+            .leftJoin(ewtDF, "link_id")
+            .writeCsv(out)
     }
 }

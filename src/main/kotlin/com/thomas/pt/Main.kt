@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.path
 import com.thomas.pt.core.RunMatsim
 import com.thomas.pt.data.processor.MATSimProcessor
+import com.thomas.pt.data.processor.MATSimProcessorV2
 import java.io.File
 import java.nio.file.Path
 import kotlin.time.measureTime
@@ -26,23 +27,13 @@ class MATSimRunner: CliktCommand() {
         canBeDir = false
     ).required().help("MATSim configuration file")
 
-    val output: File by option().file(
-        canBeDir = false
-    ).required().help("Output directory for results")
-
     override fun run() {
         val t1 = measureTime {
             RunMatsim.run(yaml, matsim)
         }
         println("Run time: $t1")
 
-        val processor = MATSimProcessor(yaml)
-//        processor.processAvgTripLength().let {
-//            output.apply {
-//                parentFile.mkdirs()
-//                writeText(it.toString())
-//            }
-//        }
+        MATSimProcessorV2(yaml).processAll()
     }
 }
 
