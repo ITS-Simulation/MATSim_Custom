@@ -114,7 +114,7 @@ RUN apt-get update && apt-get install -y wget unzip \
 
 # 2. Tải sẵn extension 'arrow' vào /root/.duckdb/extensions/...
 # Bước này chạy 1 lần lúc build, nên lúc chạy (runtime) không cần internet nữa
-RUN duckdb -c "INSTALL arrow; LOAD arrow;"
+RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
 
 # 3. Copy Ứng Dụng
 COPY build/libs/Bus_MATSim-1.0-SNAPSHOT.jar app.jar

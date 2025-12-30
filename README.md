@@ -114,7 +114,7 @@ RUN apt-get update && apt-get install -y wget unzip \
 
 # 2. Pre-download 'arrow' extension to /root/.duckdb/extensions/...
 # This runs once at build time so runtime doesn't need internet
-RUN duckdb -c "INSTALL arrow; LOAD arrow;"
+RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
 
 # 3. Copy Application
 COPY build/libs/Bus_MATSim-1.0-SNAPSHOT.jar app.jar
