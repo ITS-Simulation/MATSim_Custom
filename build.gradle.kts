@@ -24,7 +24,7 @@ dependencies {
     implementation("$matsimGroup:matsim:$matsimVersion")
     implementation("$matsimGroup:pt2matsim:25.8")
     implementation("org.yaml:snakeyaml:2.5")
-    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.2")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.3")
     implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta4")
     implementation("org.jetbrains.kotlinx:dataframe-arrow:1.0.0-Beta4")
     implementation("org.apache.arrow:arrow-vector:18.3.0")

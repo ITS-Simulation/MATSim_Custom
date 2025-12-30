@@ -1,205 +1,264 @@
 package com.thomas.pt.data.processor
 
+import com.thomas.pt.data.db.DuckDBManager
 import com.thomas.pt.data.metadata.MATSimMetadataStore
 import com.thomas.pt.utility.Utility
 import org.jetbrains.kotlinx.dataframe.AnyFrame
-import org.jetbrains.kotlinx.dataframe.AnyRow
-import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
-import org.jetbrains.kotlinx.dataframe.io.readArrowIPC
-import org.jetbrains.kotlinx.dataframe.io.writeCsv
+import org.jetbrains.kotlinx.dataframe.io.writeArrowIPC
 import org.matsim.api.core.v01.Id
 import org.matsim.api.core.v01.network.Link
 import org.matsim.pt.transitSchedule.api.TransitLine
+import org.slf4j.LoggerFactory
+import java.io.DataOutputStream
 import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.Path
+import kotlin.system.exitProcess
+import kotlin.time.measureTime
 
-class MATSimProcessor(configPath: Path) {
-    private val linkDataFrame: AnyFrame
-    private val busDelayDataFrame: AnyFrame
+class MATSimProcessor(configPath: Path) : AutoCloseable {
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val db = DuckDBManager()
+    private val linkRecordsPath: String
+    private val stopRecordsPath: String
+
+    private val losOutput: File
+    private val avgLenOutput: File
 
     private val metadata by lazy { MATSimMetadataStore.metadata }
-
     private val passengerThreshold: Int
+    private val excludeLines: Set<String>
+    private val lineFilter: String
 
     init {
         val yamlConfig = Utility.loadYaml(configPath)
         val dataOutConfig = Utility.getYamlSubconfig(yamlConfig, "files", "data")
-        linkDataFrame = DataFrame.readArrowIPC(dataOutConfig["link_records"] as String)
-            .add("duration") { "exit_time"<Double>() - "enter_time"<Double>() }
-
-        busDelayDataFrame = DataFrame.readArrowIPC(dataOutConfig["stop_records"] as String)
+        linkRecordsPath = dataOutConfig["link_records"] as String
+        stopRecordsPath = dataOutConfig["stop_records"] as String
+        losOutput = File(dataOutConfig["los_records"] as String).apply { parentFile.mkdirs() }
+        avgLenOutput = File(dataOutConfig["avg_trip_len"] as String).apply { parentFile.mkdirs() }
         passengerThreshold = Utility.getYamlSubconfig(yamlConfig, "scoring", "wait_ride").let {
             it["total_load_threshold"] as Int
         }
-    }
-
-    private fun sliceRow(row: AnyRow): List<Map<String, Any?>> {
-        val enter = row["enter_time"] as Double
-        val exit = row["exit_time"] as Double
-        val dist = row["travel_distance"] as Double
-        val duration = row["duration"] as Double
-
-        if (duration <= 0) return emptyList()
-
-        val startHour = (enter / 3600).toInt()
-        val endHour = ((exit - 1) / 3600).toInt()
-
-        return (startHour..endHour).mapNotNull { hour ->
-            val sliceStart = enter.coerceAtLeast(hour * 3600.0)
-            val sliceEnd = exit.coerceAtMost((hour + 1) * 3600.0)
-            val sliceDuration = sliceEnd - sliceStart
-
-            if (sliceDuration <= 0) null
-            else row.toMap() + mapOf(
-                "hour" to hour,
-                "slice_start" to sliceStart,
-                "duration" to sliceDuration,
-                "travel_distance" to dist * (sliceDuration / duration)
-            )
+        
+        excludeLines = (Utility.getYamlSubconfig(yamlConfig, "processing")["exclude_lines"] as? List<*>)
+            ?.map { it.toString() }
+            ?.toSet() ?: emptySet()
+        
+        lineFilter = if (excludeLines.isNotEmpty()) {
+            "AND line_id NOT IN (${excludeLines.joinToString { "'$it'" }})"
+        } else ""
+        
+        if (excludeLines.isNotEmpty()) {
+            logger.warn("Excluding lines from analysis: {}", excludeLines)
         }
     }
 
-    private fun AnyFrame.sliceByHour(): AnyFrame
-        = this.rows().flatMap(::sliceRow).toDataFrame()
+    override fun close() = db.close()
 
-    private fun processAvgTripLength(): Double
-        = linkDataFrame
-            .filter { "travel_distance"<Double>() > 0 }
-            .groupBy("vehicle_id", "trip_id")
-            .sum("travel_distance", name = "total_distance")
-            .mean("total_distance")
+    private fun processAvgTripLength(): Double = db.queryScalar(
+        """
+        SELECT AVG(total_distance) FROM (
+            SELECT vehicle_id, trip_id, SUM(travel_distance) as total_distance
+            FROM (SELECT DISTINCT * FROM read_arrow('$linkRecordsPath'))
+            WHERE travel_distance > 0
+            GROUP BY vehicle_id, trip_id
+        )
+        """
+    )
 
     private inner class ProcessAvgLoadFactor {
-        private val dfWithLoad = linkDataFrame
-            .filter { "is_bus"() }
-            .add("lf") { "passenger_load"<Int>().toDouble() / metadata.busCap }
-            .add("pax_seconds") { "passenger_load"<Int>() * "duration"<Double>() }
-            .add("weighted_lf") { "lf"<Double>() * "pax_seconds"<Double>() }
-            .add("time_weighted_lf") { "lf"<Double>() * "duration"<Double>() }
-
-        private fun aggregateBusLoadData(vararg groupBy: String): AnyFrame
-            = dfWithLoad.groupBy(*groupBy).aggregate {
-                sum("passenger_load") into "total_passengers"
-                sum("weighted_lf") into "total_weighted_lf"
-                sum("pax_seconds") into "total_pax_seconds"
-                sum("time_weighted_lf") into "total_time_weighted_lf"
-                sum("duration") into "total_duration"
-            }
-
-        private fun computePrimaryLF(df: AnyFrame, vararg groupBy: String): AnyFrame
-            = df
-                .filter { "total_passengers"<Int>() >= passengerThreshold }
-                .add("avg_lf") { "total_weighted_lf"<Double>() / "total_pax_seconds"<Double>() }
-                .select(*groupBy, "avg_lf")
-
-        private fun computeFallbackLF(df: AnyFrame, vararg groupBy: String): AnyFrame
-            = df
-                .filter { "total_passengers"<Int>() < passengerThreshold }
-                .add("avg_lf") { "total_time_weighted_lf"<Double>() / "total_duration"<Double>() }
-                .select(*groupBy, "avg_lf")
-
-        fun process(): AnyFrame {
-            val lineGroup = arrayOf("link_id", "line_id")
-            val dfLineStat = aggregateBusLoadData(*lineGroup)
-            val busLineLoad = computePrimaryLF(dfLineStat, *lineGroup)
-                .concat(computeFallbackLF(dfLineStat, *lineGroup))
-
-            val linkGroup = arrayOf("link_id")
-            val dfLinkStat = aggregateBusLoadData(*linkGroup)
-            val busLinkLoad = computePrimaryLF(dfLinkStat, *linkGroup)
-                .concat(computeFallbackLF(dfLinkStat, *linkGroup))
-
-            val busLineLoadMap = busLineLoad
-                .rows()
-                .groupBy { it["link_id"] as String }
-                .mapValues { (_, rows) ->
-                    rows.associate { row ->
-                        row["line_id"] as String to row["avg_lf"] as Double
-                    }
-                }
-
-            return busLinkLoad
-                .add("line_avg_lf") { busLineLoadMap["link_id"()] ?: emptyMap() }
-                .select("link_id", "avg_lf", "line_avg_lf")
-        }
+        fun process(): AnyFrame
+            = db.query("""
+                WITH bus_data AS (
+                    SELECT DISTINCT link_id, line_id, passenger_load,
+                           (exit_time - enter_time) as duration,
+                           passenger_load::DOUBLE / ${metadata.busCap} as lf
+                    FROM read_arrow('$linkRecordsPath')
+                    WHERE is_bus = true $lineFilter
+                    AND (exit_time - enter_time) >= 1 
+                    AND travel_distance >= 0
+                    AND (travel_distance / (exit_time - enter_time)) <= 42
+                ),
+                line_stats AS (
+                    SELECT link_id, line_id,
+                        SUM(passenger_load) as total_passengers,
+                        SUM(lf * passenger_load * duration) as weighted_lf,
+                        SUM(passenger_load * duration) as pax_seconds,
+                        SUM(lf * duration) as time_weighted_lf,
+                        SUM(duration) as total_duration
+                    FROM bus_data
+                    GROUP BY link_id, line_id
+                ),
+                line_lf AS (
+                    SELECT link_id, line_id,
+                        CASE WHEN total_passengers >= $passengerThreshold 
+                             THEN weighted_lf / NULLIF(pax_seconds, 0)
+                             ELSE time_weighted_lf / NULLIF(total_duration, 0)
+                        END as avg_lf
+                    FROM line_stats
+                ),
+                line_map AS (
+                    SELECT link_id, MAP(LIST(line_id), LIST(avg_lf)) as line_avg_lf
+                    FROM line_lf
+                    GROUP BY link_id
+                ),
+                link_stats AS (
+                    SELECT link_id,
+                        SUM(total_passengers) as total_passengers,
+                        SUM(weighted_lf) as weighted_lf,
+                        SUM(pax_seconds) as pax_seconds,
+                        SUM(time_weighted_lf) as time_weighted_lf,
+                        SUM(total_duration) as total_duration
+                    FROM line_stats
+                    GROUP BY link_id
+                ),
+                link_lf AS (
+                    SELECT link_id,
+                        CASE WHEN total_passengers >= $passengerThreshold 
+                             THEN weighted_lf / NULLIF(pax_seconds, 0)
+                             ELSE time_weighted_lf / NULLIF(total_duration, 0)
+                        END as avg_lf
+                    FROM link_stats
+                )
+                SELECT lf.link_id, lf.avg_lf, lm.line_avg_lf, ls.pax_seconds, ls.total_duration
+                FROM link_lf lf
+                JOIN link_stats ls ON lf.link_id = ls.link_id
+                LEFT JOIN line_map lm ON lf.link_id = lm.link_id
+            """)
     }
 
     private inner class ProcessVehicleFlow {
-        private val dfWithSlicedFlow = linkDataFrame.sliceByHour()
-
-        fun process(): AnyFrame {
-            val dfStat = dfWithSlicedFlow
-                .groupBy("link_id", "hour")
-                .aggregate {
-                    sum("travel_distance") into "hourly_distance"
-                    sum("duration") into "hourly_duration"
-                    count() into "vehicle_count"
-                }
-                .groupBy("link_id")
-                .aggregate {
-                    mean("vehicle_count") into "veh_flow"
-                    sum("hourly_distance") into "total_distance"
-                    sum("hourly_duration") into "total_duration"
-                }
-                .add("avg_speed") { "total_distance"<Double>() / "total_duration"<Double>() }
-                .remove("total_distance", "total_duration")
-
-            val dfBusFlow = dfWithSlicedFlow.filter { "is_bus"() }
-            val dfBusLineSpeed = dfBusFlow
-                .groupBy("link_id", "line_id")
-                .aggregate {
-                    sum("travel_distance") into "line_travel_distance"
-                    sum("duration") into "line_duration"
-                }
-                .add("line_avg_speed") { "line_travel_distance"<Double>() / "line_duration"<Double>() }
-                .select("link_id", "line_id", "line_avg_speed")
-            val dfBusLinkSpeed = dfBusFlow
-                .groupBy("link_id")
-                .aggregate {
-                    sum("travel_distance") into "link_travel_distance"
-                    sum("duration") into "link_duration"
-                }
-                .add("bus_link_avg_speed") { "link_travel_distance"<Double>() / "link_duration"<Double>() }
-                .select("link_id", "bus_link_avg_speed")
-
-            val busLineSpeedMap = dfBusLineSpeed
-                .rows()
-                .groupBy { it["link_id"] as String }
-                .mapValues { (_, rows) ->
-                    rows.associate { row ->
-                        row["line_id"] as String to row["line_avg_speed"] as Double
-                    }
-                }
-
-            return dfStat
-                .leftJoin(dfBusLinkSpeed) { "link_id"<String>() }
-                .fillNulls("bus_link_avg_speed").withZero()
-                .add("bus_line_avg_speed") { busLineSpeedMap["link_id"()] ?: emptyMap() }
-                .select("link_id", "veh_flow", "avg_speed", "bus_link_avg_speed", "bus_line_avg_speed")
-        }
+        fun process(): AnyFrame
+            = db.query("""
+                WITH base AS (
+                    SELECT DISTINCT *, (exit_time - enter_time) as duration
+                    FROM read_arrow('$linkRecordsPath')
+                    WHERE (exit_time - enter_time) >= 1 
+                    AND travel_distance >= 0
+                    AND (travel_distance / (exit_time - enter_time)) <= 42
+                ),
+                sliced AS (
+                    SELECT 
+                        link_id, line_id, is_bus, travel_distance, duration,
+                        hour,
+                        LEAST(exit_time, (hour + 1) * 3600.0) - 
+                            GREATEST(enter_time, hour * 3600.0) as slice_duration
+                    FROM base,
+                    LATERAL (
+                        SELECT UNNEST(GENERATE_SERIES(
+                            CAST(FLOOR(enter_time / 3600) AS INTEGER),
+                            CAST(FLOOR((exit_time - 0.001) / 3600) AS INTEGER)
+                        )) as hour
+                    )
+                ),
+                hourly AS (
+                    SELECT link_id, hour,
+                        SUM(travel_distance * slice_duration / duration) as hourly_distance,
+                        SUM(slice_duration) as hourly_duration,
+                        COUNT(*) as vehicle_count
+                    FROM sliced
+                    GROUP BY link_id, hour
+                ),
+                link_stats AS (
+                    SELECT link_id,
+                        AVG(vehicle_count) as veh_flow,
+                        SUM(hourly_distance) / NULLIF(SUM(hourly_duration), 0) as avg_speed
+                    FROM hourly
+                    GROUP BY link_id
+                ),
+                bus_link_speed AS (
+                    SELECT link_id,
+                        SUM(travel_distance * slice_duration / duration) / 
+                            NULLIF(SUM(slice_duration), 0) as bus_link_avg_speed
+                    FROM sliced WHERE is_bus = true $lineFilter
+                    GROUP BY link_id
+                ),
+                bus_line_speed AS (
+                    SELECT link_id, line_id,
+                        SUM(travel_distance * slice_duration / duration) / 
+                            NULLIF(SUM(slice_duration), 0) as line_avg_speed
+                    FROM sliced WHERE is_bus = true $lineFilter
+                    GROUP BY link_id, line_id
+                ),
+                bus_line_map AS (
+                    SELECT link_id, 
+                        MAP(LIST(line_id), LIST(line_avg_speed)) as bus_line_avg_speed
+                    FROM bus_line_speed
+                    GROUP BY link_id
+                )
+                SELECT 
+                    ls.link_id, ls.veh_flow, ls.avg_speed,
+                    COALESCE(bls.bus_link_avg_speed, 0) as bus_link_avg_speed,
+                    COALESCE(blm.bus_line_avg_speed, MAP {}) as bus_line_avg_speed
+                FROM link_stats ls
+                LEFT JOIN bus_link_speed bls ON ls.link_id = bls.link_id
+                LEFT JOIN bus_line_map blm ON ls.link_id = blm.link_id
+            """)
     }
 
     private inner class ProcessEWT {
-        // TODO: Process EWT from bus delay data
+        private fun getEWTAtStops(): Pair<AnyFrame, Map<String, Map<String, Double>>> {
+            val dfEWT = db.query("""
+                WITH weighted AS (
+                    SELECT link_id, line_id, schedule_deviation, boarding,
+                        schedule_deviation * boarding as weighted_deviation
+                    FROM read_arrow('$stopRecordsPath') 
+                    WHERE 1=1 $lineFilter
+                ),
+                line_stats AS (
+                    SELECT link_id, line_id,
+                        SUM(weighted_deviation) as sum_weighted,
+                        SUM(boarding) as sum_weight,
+                        AVG(schedule_deviation) as mean_delay
+                    FROM weighted
+                    GROUP BY link_id, line_id
+                ),
+                line_ewt AS (
+                    SELECT link_id, line_id,
+                        CASE WHEN sum_weight >= $passengerThreshold 
+                             THEN sum_weighted / sum_weight
+                             ELSE mean_delay
+                        END as ewt
+                    FROM line_stats
+                ),
+                line_map AS (
+                    SELECT link_id, MAP(LIST(line_id), LIST(ewt)) as line_ewt_map
+                    FROM line_ewt
+                    GROUP BY link_id
+                ),
+                link_stats AS (
+                    SELECT link_id,
+                        SUM(weighted_deviation) as sum_weighted,
+                        SUM(boarding) as sum_weight,
+                        AVG(schedule_deviation) as mean_delay
+                    FROM weighted
+                    GROUP BY link_id
+                ),
+                link_ewt AS (
+                    SELECT link_id,
+                        CASE WHEN sum_weight >= $passengerThreshold 
+                             THEN sum_weighted / sum_weight
+                             ELSE mean_delay
+                        END as measured_ewt
+                    FROM link_stats
+                )
+                SELECT le.link_id, le.measured_ewt, lm.line_ewt_map
+                FROM link_ewt le
+                LEFT JOIN line_map lm ON le.link_id = lm.link_id
+            """)
 
-        private val dfWithEWT = busDelayDataFrame
-            .add("weighted_deviation") { "schedule_deviation"<Double>() * "boarding"<Int>() }
+            val ewtAtStops = dfEWT.rows().associate { row ->
+                val linkId = row["link_id"] as String
+                val rawMap = row["line_ewt_map"] as? Map<*, *> ?: emptyMap<String, Double>()
+                val typedMap = rawMap.entries.associate { (k, v) ->
+                    k.toString() to ((v as? Number)?.toDouble() ?: 0.0)
+                }
+                linkId to typedMap
+            }
 
-        private fun ewtAggregation(df: AnyFrame, vararg groupBy: String): AnyFrame
-            = df.groupBy(*groupBy)
-                .aggregate {
-                    sum("weighted_deviation") into "sum_weighted_deviation"
-                    sum("boarding") into "sum_weight"
-                    mean("schedule_deviation") into "mean_delay"
-                }
-                .add("ewt") {
-                    if ("sum_weight"<Int>() >= passengerThreshold)
-                        "sum_weighted_deviation"<Double>() / "sum_weight"<Int>()
-                    else "mean_delay"()
-                }
-                .select(*groupBy, "ewt")
+            return dfEWT.select("link_id", "measured_ewt") to ewtAtStops
+        }
 
         private fun interpolateEWTForLine(
             ewtAtStops: Map<String, Map<String, Double>>
@@ -208,27 +267,36 @@ class MATSimProcessor(configPath: Path) {
             val linkLengths: Map<Id<Link>, Double> = metadata.linkData.mapValues {
                 (_, linkMeta) -> linkMeta.length
             }
-
+            
+            
             metadata.busRoutes.forEach { (lineId, lineRoutes) ->
+                // Skip excluded lines
+                if (lineId.toString() in excludeLines) {
+                    return@forEach
+                }
+                
                 val resultAccumulator: (Id<Link>, Double) -> Unit = { linkId, ewt ->
                     acc.getOrPut(linkId to lineId) { mutableListOf() }.add(ewt)
                 }
 
                 for (route in lineRoutes) {
+                    val routeLinks = route.route.map { it.toString() }
                     val stopsEWTIdx = route.route.mapIndexedNotNull { index, linkId ->
                         if (ewtAtStops["$linkId"]?.containsKey("$lineId") == true) index else null
                     }
-                    if (stopsEWTIdx.isEmpty()) continue
+                    if (stopsEWTIdx.isEmpty()) {
+                        continue
+                    }
 
                     val firstIdx = stopsEWTIdx.first()
-                    val firstEWT = ewtAtStops["${route.route[firstIdx]}"]!!["$lineId"]!!
+                    val firstEWT = ewtAtStops[routeLinks[firstIdx]]!!["$lineId"]!!
                     (0..firstIdx).forEach { resultAccumulator(route.route[it], firstEWT) }
 
                     (0 until stopsEWTIdx.size - 1).forEach { i ->
                         val startIdx = stopsEWTIdx[i]
                         val endIdx = stopsEWTIdx[i + 1]
-                        val startEWT = ewtAtStops["${route.route[startIdx]}"]!!["$lineId"]!!
-                        val endEWT = ewtAtStops["${route.route[endIdx]}"]!!["$lineId"]!!
+                        val startEWT = ewtAtStops[routeLinks[startIdx]]!!["$lineId"]!!
+                        val endEWT = ewtAtStops[routeLinks[endIdx]]!!["$lineId"]!!
                         val segLen = (startIdx..endIdx).sumOf {
                             linkLengths[route.route[it]] ?: 0.0
                         }
@@ -245,12 +313,14 @@ class MATSimProcessor(configPath: Path) {
                     }
 
                     val lastIdx = stopsEWTIdx.last()
-                    val lastEWT = ewtAtStops["${route.route[lastIdx]}"]!!["$lineId"]!!
+                    val lastEWT = ewtAtStops[routeLinks[lastIdx]]!!["$lineId"]!!
                     (lastIdx + 1 until route.route.size).forEach {
                         resultAccumulator(route.route[it], lastEWT)
                     }
                 }
             }
+            
+            
             return acc.map { (key, values) ->
                 mapOf(
                     "link_id" to key.first.toString(),
@@ -260,9 +330,7 @@ class MATSimProcessor(configPath: Path) {
             }.toDataFrame()
         }
 
-        private fun interpolateEWTForLink(
-            dfLineInterpolated: AnyFrame,
-        ): AnyFrame = dfLineInterpolated
+        private fun interpolateEWTForLink(dfLineInterpolated: AnyFrame): AnyFrame = dfLineInterpolated
             .add("weight") {
                 metadata.linesHeadway[Id.create(
                     "line_id"<String>(), TransitLine::class.java
@@ -283,21 +351,11 @@ class MATSimProcessor(configPath: Path) {
             .select("link_id", "interpolated_ewt")
 
         fun process(): AnyFrame {
-            val dfEWTPerLine = ewtAggregation(dfWithEWT, "link_id", "line_id")
-            val dfEWTPerLink = ewtAggregation(dfWithEWT, "link_id")
-                .rename("ewt" to "measured_ewt")
+            val (dfEWTPerLink, ewtAtStops) = getEWTAtStops()
 
-            val dfEWTLine = dfEWTPerLine.rows()
-                .groupBy { it["link_id"] as String }
-                .mapValues { (_, rows) ->
-                    rows.associate { row ->
-                        row["line_id"] as String to row["ewt"] as Double
-                    }
-                }
-                .let { interpolateEWTForLine(it) }
-
+            val dfEWTLine = interpolateEWTForLine(ewtAtStops)
             val dfEWTLinkInterpolated = interpolateEWTForLink(dfEWTLine)
-
+            
             val dfEWTLink = dfEWTLinkInterpolated
                 .leftJoin(dfEWTPerLink, "link_id")
                 .add("ewt") {
@@ -319,21 +377,68 @@ class MATSimProcessor(configPath: Path) {
         }
     }
 
+
     fun processAll() {
-        val avgTripLength = processAvgTripLength()
-        println("Average Trip Length: $avgTripLength")
+        val time = measureTime {
+            logger.info("Starting Average Trip Length processing...")
+            val avgTripLength: Double = try {
+                processAvgTripLength()
+            } catch (e: Exception) {
+                logger.error("Failed to process Average Trip Length", e)
+                exitProcess(1)
+            }
+            DataOutputStream(avgLenOutput.outputStream()).use {
+                it.writeDouble(avgTripLength)
+            }
 
-        val avgLoadFactorDF = ProcessAvgLoadFactor().process()
-        System.gc()
-        val vehicleFlowDF = ProcessVehicleFlow().process()
-        System.gc()
-        val ewtDF = ProcessEWT().process()
-        System.gc()
+            logger.info("Starting Average Load Factor processing...")
+            val avgLoadFactorDF = try {
+                ProcessAvgLoadFactor().process()
+            } catch (e: Exception) {
+                logger.error("Failed to process Average Load Factor", e)
+                exitProcess(1)
+            }
+            
+            logger.info("Starting Vehicle Flow processing...")
+            val vehicleFlowDF = try {
+                ProcessVehicleFlow().process()
+            } catch (e: Exception) {
+                logger.error("Failed to process Vehicle Flow", e)
+                exitProcess(1)
+            }
+            
+            logger.info("Starting EWT processing...")
+            val ewtDF = try {
+                ProcessEWT().process()
+            } catch (e: Exception) {
+                logger.error("Failed to process EWT", e)
+                exitProcess(1)
+            }
 
-        val out = File("data/out/merged_los.csv").apply { parentFile.mkdirs() }
-        val losData = avgLoadFactorDF
-            .leftJoin(vehicleFlowDF, "link_id")
-            .leftJoin(ewtDF, "link_id")
-            .writeCsv(out)
+            logger.info("Merging and filtering data...")
+            // Extract Link Metadata (Length, Frequency)
+            val linkMetaDF = metadata.linkData.map { (id, meta) ->
+                mapOf(
+                    "link_id" to id.toString(),
+                    "bus_frequency" to meta.busFreq,
+                    "length" to meta.length,
+                    "bus_capacity" to metadata.busCap
+                )
+            }.toDataFrame()
+
+            @Suppress("RemoveExplicitTypeArguments")
+            val merged = avgLoadFactorDF
+                .leftJoin(vehicleFlowDF, "link_id")
+                .leftJoin(ewtDF, "link_id")
+                .leftJoin(linkMetaDF, "link_id")
+                .filter {
+                    ("bus_frequency"<Double?>() ?: 0.0) > 0.0 &&
+                    ("bus_link_avg_speed"<Double?>() ?: 0.0) > 0.0 &&
+                    ("length"<Double?>() ?: 0.0) > 0.0
+                }
+
+            merged.writeArrowIPC(losOutput)
+        }
+        logger.info("MATSim data processing completed in {}", time)
     }
 }

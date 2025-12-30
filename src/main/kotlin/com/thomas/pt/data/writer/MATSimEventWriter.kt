@@ -9,7 +9,6 @@ import com.thomas.pt.data.model.extractor.LinkData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.nio.file.Path
 
 class MATSimEventWriter(
     scope: CoroutineScope,

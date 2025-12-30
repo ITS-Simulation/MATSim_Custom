@@ -24,9 +24,10 @@ object MATSimMetadataStore {
 
         schedule.transitLines.values.forEach{ line ->
             line.routes.values.forEach { route ->
-                val routeLinks: List<Id<Link>> = listOf(route.route.startLinkId) + 
-                    route.route.linkIds + 
-                    listOf(route.route.endLinkId)
+                val routeLinks: List<Id<Link>> = route.route.linkIds.toMutableList().apply {
+                    add(0, route.route.startLinkId)
+                    add(route.route.endLinkId)
+                }
                 val departures: List<Double> = route.departures.values.map { it.departureTime }.sorted()
 
                 if (departures.isNotEmpty()) {
@@ -117,7 +118,7 @@ object MATSimMetadataStore {
             }.forEach { (id, line) ->
             line.routes.forEach { (_, route) ->
                 val fullRoute: List<Id<Link>> = route.route.linkIds.toMutableList().apply {
-                    addFirst(route.route.startLinkId)
+                    add(0, route.route.startLinkId)
                     add(route.route.endLinkId)
                 }
                 val routeStops: Set<Id<TransitStopFacility>>

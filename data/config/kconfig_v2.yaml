@@ -10,12 +10,9 @@ files:
   data: # These files are internal only. No need to change it
     link_records: "data/temp/link_records.arrow"
     stop_records: "data/temp/stop_records.arrow"
-  los_data:
-    merged: "data/out/los/merged_los.csv"
-    filtered: "data/out/los/filtered_los.csv" # Use when an output of filtered LOS data is desired
-    outlier: "data/out/los/outlier_los.csv" # Use when an output of outlier LOS data is desired
-    scores: "data/out/los/pt_los_scores.csv"
-    line_scores: "data/out/los/pt_line_los_scores.csv"
+    avg_trip_len: "data/temp/trip_len.bin"
+    los_records: "data/temp/los_records.arrow"
+    los_scores: "data/temp/los_scores.arrow"
 
 arrow:
   batch_size: 50000
