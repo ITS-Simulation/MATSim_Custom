@@ -1,6 +1,7 @@
 # Pipeline Xử Lý Bus MATSim
+[🇬🇧 English](README.md)
 
-Đây là một pipeline hậu xử lý và tính điểm (scoring) dựa trên Kotlin cho dữ liệu mô phỏng xe buýt MATSim. Pipeline sử dụng DuckDB để xử lý dữ liệu hiệu năng cao và tính toán điểm Mức độ Phục vụ (Level of Service - LOS) dựa trên tiêu chuẩn TCQSM.
+Một pipeline Kotlin hiệu năng cao và tính toán điểm Mức độ Phục vụ (Level of Service - LOS) dựa trên tiêu chuẩn TCQSM.
 
 ## Cách Sử Dụng
 
