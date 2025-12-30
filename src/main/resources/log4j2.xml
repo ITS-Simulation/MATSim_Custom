@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="root.level">${sys:log.level.root:-warn}</Property>
+        <Property name="app.level">${sys:log.level.app:-info}</Property>
+        <Property name="matsim.level">${sys:log.level.matsim:-error}</Property>
+    </Properties>
+    
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss.SSS} [${sys:log.signature}] [%t] %-5level %logger{1} - %msg%n"/>
+        </Console>
+        
+        <File name="AppLog" fileName="${sys:log.file:-logs/app.log}" append="false">
+             <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss.SSS} [${sys:log.signature}] [%t] %-5level %logger{1} - %msg%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="${root.level}">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+        <Logger name="com.thomas" level="${app.level}" additivity="true">
+            <AppenderRef ref="AppLog"/>
+        </Logger>
+        
+        <Logger name="org.matsim" level="${matsim.level}" additivity="false">
+             <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>
