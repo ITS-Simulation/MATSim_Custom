@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.thomas"
-version = "1.0-SNAPSHOT"
+version = "1.1"
 
 repositories {
     maven("https://repo.osgeo.org/repository/release/")

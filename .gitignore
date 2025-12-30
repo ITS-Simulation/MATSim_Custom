@@ -46,3 +46,6 @@ data/*
 sim/**
 
 __init__.py
+
+dist/
+dist.zip
