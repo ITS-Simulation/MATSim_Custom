@@ -7,35 +7,24 @@ matsim:
     - "pt"
 
 files:
-  inp:
-    net: "sim/bus_sim/cottbus-with-pt/input/network1.xml"
-    transit: "sim/bus_sim/cottbus-with-pt/input/schedule1.xml"
-    transit_vehicles: "sim/bus_sim/cottbus-with-pt/input/transitVehicles1.xml"
-  out:
-    events: "sim/bus_sim/cottbus-with-pt/output/cb01/output_events.xml.gz"
   data: # These files are internal only. No need to change it
-    # total_dist: "data/out/dataset/pt_trip_total_distance.csv"
-    # wait_time: "data/out/dataset/pt_wait_time.csv"
-    # veh_flow: "data/out/dataset/vehicle_flow.csv"
-    # load_history: "data/out/dataset/pt_bus_load_data.csv"
-    # avg_trip_length: "data/out/dataset/avg_trip_length.json"
-    link_records: "data/out/link_records.csv"
-    stop_records: "data/out/stop_records.csv"
-  los_data:
-    merged: "data/out/los/merged_los.csv"
-    filtered: "data/out/los/filtered_los.csv" # Use when an output of filtered LOS data is desired
-    outlier: "data/out/los/outlier_los.csv" # Use when an output of outlier LOS data is desired
-    scores: "data/out/los/pt_los_scores.csv"
-    line_scores: "data/out/los/pt_line_los_scores.csv"
-  metadata:
-    bus_headway: "data/metadata/bus_line_headway.csv"
-    link_data: "data/metadata/link_data.csv"
-    bus_vehicles: "data/metadata/bus_vehicle_ids.csv"
+    link_records: "data/temp/link_records.arrow"
+    stop_records: "data/temp/stop_records.arrow"
+    avg_trip_len: "data/temp/trip_len.bin"
+    los_records: "data/temp/los_records.arrow"
+    los_scores: "data/temp/los_scores.arrow"
+
+arrow:
+  batch_size: 50000
 
 bus:
   seating: 30
   standing: 20
   cap_headroom: 0.5 # 50% headroom for standing passengers
+
+processing:
+  exclude_lines:  # Lines to exclude from analysis (empty list = include all)
+    - "Wenden"
 
 scoring:
   wait_ride:
