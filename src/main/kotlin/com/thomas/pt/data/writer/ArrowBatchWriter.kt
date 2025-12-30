@@ -5,12 +5,11 @@ import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.VectorSchemaRoot
 import org.apache.arrow.vector.ipc.ArrowStreamWriter
 import org.apache.arrow.vector.types.pojo.Schema
+import java.io.File
 import java.nio.channels.Channels
-import java.nio.file.Path
-import kotlin.io.path.outputStream
 
 abstract class ArrowBatchWriter<T>(
-    outputPath: Path,
+    outputPath: File,
     private val batchSize: Int
 ): AutoCloseable {
     protected val allocator: BufferAllocator = RootAllocator()

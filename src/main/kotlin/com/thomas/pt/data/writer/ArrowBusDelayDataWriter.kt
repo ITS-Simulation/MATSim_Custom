@@ -6,10 +6,11 @@ import org.apache.arrow.vector.Float8Vector
 import org.apache.arrow.vector.IntVector
 import org.apache.arrow.vector.VarCharVector
 import org.apache.arrow.vector.types.pojo.Schema
+import java.io.File
 import java.nio.file.Path
 
 class ArrowBusDelayDataWriter(
-    outputPath: Path,
+    outputPath: File,
     batchSize: Int
 ): ArrowBatchWriter<BusDelayData>(outputPath, batchSize) {
     override val schema: Schema = BusDelayDataSchema.schema

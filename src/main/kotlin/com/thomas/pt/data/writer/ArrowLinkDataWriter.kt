@@ -7,10 +7,10 @@ import org.apache.arrow.vector.IntVector
 import org.apache.arrow.vector.VarCharVector
 import org.apache.arrow.vector.types.pojo.Schema
 import com.thomas.pt.data.model.extractor.LinkData
-import java.nio.file.Path
+import java.io.File
 
 class ArrowLinkDataWriter(
-    outputPath: Path,
+    outputPath: File,
     batchSize: Int
 ): ArrowBatchWriter<LinkData>(outputPath, batchSize) {
     override val schema: Schema = LinkDataSchema.schema

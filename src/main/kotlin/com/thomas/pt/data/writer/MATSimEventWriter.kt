@@ -8,12 +8,13 @@ import com.thomas.pt.data.model.extractor.BusDelayData
 import com.thomas.pt.data.model.extractor.LinkData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import java.nio.file.Path
 
 class MATSimEventWriter(
     scope: CoroutineScope,
-    linkDataPath: Path,
-    busDelayDataPath: Path,
+    linkDataPath: File,
+    busDelayDataPath: File,
     batchSize: Int,
 ): AutoCloseable {
     private val linkDataChannel = Channel<LinkData>(200_000)
@@ -30,8 +31,8 @@ class MATSimEventWriter(
     }
 
     init {
-        linkDataPath.parent.toFile().mkdirs()
-        busDelayDataPath.parent.toFile().mkdirs()
+        linkDataPath.parentFile.mkdirs()
+        busDelayDataPath.parentFile.mkdirs()
     }
 
     fun pushLinkData(item: LinkData): Boolean

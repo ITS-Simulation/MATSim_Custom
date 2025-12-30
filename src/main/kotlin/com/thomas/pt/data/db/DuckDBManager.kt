@@ -1,4 +1,4 @@
-package com.thomas.pt.data.processor
+package com.thomas.pt.data.db
 
 import org.duckdb.DuckDBConnection
 import org.jetbrains.kotlinx.dataframe.AnyFrame
@@ -6,7 +6,7 @@ import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-class DuckDBHelper : AutoCloseable {
+class DuckDBManager : AutoCloseable {
     private val conn: DuckDBConnection =
         DriverManager.getConnection("jdbc:duckdb:") as DuckDBConnection
 
@@ -21,7 +21,6 @@ class DuckDBHelper : AutoCloseable {
     }
 
     init {
-        // Install and load Arrow extension for read_arrow() support
         conn.createStatement().apply {
             execute("INSTALL arrow FROM community")
             execute("LOAD arrow")
