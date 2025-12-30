@@ -35,8 +35,8 @@ class MATSimProcessor(configPath: Path) : AutoCloseable {
         val dataOutConfig = Utility.getYamlSubconfig(yamlConfig, "files", "data")
         linkRecordsPath = dataOutConfig["link_records"] as String
         stopRecordsPath = dataOutConfig["stop_records"] as String
-        losOutput = File(dataOutConfig["los_records"] as String).apply { parentFile.mkdirs() }
-        avgLenOutput = File(dataOutConfig["avg_trip_len"] as String).apply { parentFile.mkdirs() }
+        losOutput = File(dataOutConfig["los_records"] as String).apply { absoluteFile.parentFile.mkdirs() }
+        avgLenOutput = File(dataOutConfig["avg_trip_len"] as String).apply { absoluteFile.parentFile.mkdirs() }
         passengerThreshold = Utility.getYamlSubconfig(yamlConfig, "scoring", "wait_ride").let {
             it["total_load_threshold"] as Int
         }

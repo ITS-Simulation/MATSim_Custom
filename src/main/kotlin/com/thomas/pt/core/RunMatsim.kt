@@ -78,10 +78,10 @@ object RunMatsim {
 
         val dataOutConfig = Utility.getYamlSubconfig(yamlConfig, "files", "data")
         val linkDataOut = File(dataOutConfig["link_records"] as String).apply {
-            parentFile.mkdirs()
+            absoluteFile.parentFile.mkdirs()
         }
         val busDelayDataOut = File(dataOutConfig["stop_records"] as String).apply {
-            parentFile.mkdirs()
+            absoluteFile.parentFile.mkdirs()
         }
         MATSimEventWriter(
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),

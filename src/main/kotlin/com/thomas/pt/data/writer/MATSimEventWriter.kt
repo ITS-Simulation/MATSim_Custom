@@ -30,8 +30,8 @@ class MATSimEventWriter(
     }
 
     init {
-        linkDataPath.parentFile.mkdirs()
-        busDelayDataPath.parentFile.mkdirs()
+        linkDataPath.absoluteFile.parentFile.mkdirs()
+        busDelayDataPath.absoluteFile.parentFile.mkdirs()
     }
 
     fun pushLinkData(item: LinkData): Boolean

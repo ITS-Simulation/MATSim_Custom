@@ -79,7 +79,7 @@ class MATSimRunner: CliktCommand() {
             }
             logger.info("Run time: $t1")
 
-            output.parentFile.mkdirs()
+            output.absoluteFile.parentFile.mkdirs()
             if (output.exists()) output.delete()
 
             MATSimProcessor(yaml).processAll()

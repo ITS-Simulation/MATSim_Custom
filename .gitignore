@@ -48,4 +48,4 @@ sim/**
 __init__.py
 
 dist/
-dist.zip
+dist*.zip
