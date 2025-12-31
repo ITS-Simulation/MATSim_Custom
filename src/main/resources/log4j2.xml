@@ -11,7 +11,7 @@
             <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss.SSS} [${sys:log.signature}] [%t] %-5level %logger{1} - %msg%n"/>
         </Console>
         
-        <File name="AppLog" fileName="${sys:log.file:-logs/app.log}" append="false">
+        <File name="AppLog" fileName="${sys:log.file:-logs/app.log}" append="true">
              <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss.SSS} [${sys:log.signature}] [%t] %-5level %logger{1} - %msg%n"/>
         </File>
     </Appenders>
