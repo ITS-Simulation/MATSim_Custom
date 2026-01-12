@@ -27,6 +27,7 @@ class MATSimProcessor(configPath: Path) : AutoCloseable {
 
     private val metadata by lazy { MATSimMetadataStore.metadata }
     private val passengerThreshold: Int
+    private val boardingThreshold: Int
     private val excludeLines: Set<String>
     private val lineFilter: String
 
@@ -40,7 +41,9 @@ class MATSimProcessor(configPath: Path) : AutoCloseable {
         passengerThreshold = Utility.getYamlSubconfig(yamlConfig, "scoring", "wait_ride").let {
             it["total_load_threshold"] as Int
         }
-        
+        boardingThreshold = Utility.getYamlSubconfig(yamlConfig, "scoring", "wait_ride").let {
+            it["boarding_threshold"] as Int
+        }
         excludeLines = (Utility.getYamlSubconfig(yamlConfig, "processing")["exclude_lines"] as? List<*>)
             ?.map { it.toString() }
             ?.toSet() ?: emptySet()
@@ -216,7 +219,7 @@ class MATSimProcessor(configPath: Path) : AutoCloseable {
                 ),
                 line_ewt AS (
                     SELECT link_id, line_id,
-                        CASE WHEN sum_weight >= $passengerThreshold 
+                        CASE WHEN sum_weight >= $boardingThreshold
                              THEN sum_weighted / sum_weight
                              ELSE mean_delay
                         END as ewt
@@ -237,7 +240,7 @@ class MATSimProcessor(configPath: Path) : AutoCloseable {
                 ),
                 link_ewt AS (
                     SELECT link_id,
-                        CASE WHEN sum_weight >= $passengerThreshold 
+                        CASE WHEN sum_weight >= $boardingThreshold 
                              THEN sum_weighted / sum_weight
                              ELSE mean_delay
                         END as measured_ewt
