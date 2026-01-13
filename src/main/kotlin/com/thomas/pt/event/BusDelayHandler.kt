@@ -134,7 +134,7 @@ class BusDelayHandler(
         if (event.personId.toString().startsWith("pt_")) return
 
         val state = vehicleStates[event.vehicleId] ?: return
-        
+
         if (state.stopId != null) { state.boarding++ }
     }
 
@@ -144,7 +144,7 @@ class BusDelayHandler(
         if (event.personId.toString().startsWith("pt_")) return
 
         val state = vehicleStates[event.vehicleId] ?: return
-        
+
         if (state.stopId != null) { state.alighting++ }
     }
 

@@ -49,3 +49,6 @@ __init__.py
 
 dist/
 dist*.zip
+
+QTesst/data_cottbus/
+QTesst/pt-tutorial/

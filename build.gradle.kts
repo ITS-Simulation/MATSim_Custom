@@ -53,3 +53,4 @@ tasks.shadowJar {
 tasks.test {
     useJUnitPlatform()
 }
+
