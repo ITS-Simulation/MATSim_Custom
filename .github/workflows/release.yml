@@ -33,6 +33,13 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
+      - name: Create release zip
+        run: |
+          mkdir -p release_assets
+          cp build/libs/dist-*.jar release_assets/
+          cp data/config/config.yaml release_assets/
+          zip -j dist-${{ steps.get_version.outputs.VERSION }}.zip release_assets/*
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -41,7 +48,6 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            build/libs/dist-*.jar
-            data/config/config.yaml
+            dist-*.zip 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
