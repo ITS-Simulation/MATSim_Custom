@@ -37,8 +37,8 @@ fun main(){
     // 4. Custom Module
     controller.addOverridingModule(object : AbstractModule() {
         override fun install() {
-            this.addEventHandlerBinding().toInstance(BPhandler);
-            this.addEventHandlerBinding().toInstance(Dhandler);
+//            this.addEventHandlerBinding().toInstance(BPhandler);
+//            this.addEventHandlerBinding().toInstance(Dhandler);
             this.addEventHandlerBinding().toInstance(Thandler);
 
         }

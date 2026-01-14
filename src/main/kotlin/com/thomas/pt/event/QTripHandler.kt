@@ -7,82 +7,91 @@ import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler
 import org.matsim.vehicles.Vehicle
 import com.thomas.pt.data.model.extractor.QTripData
+import org.matsim.api.core.v01.events.ActivityStartEvent
+import org.matsim.api.core.v01.events.PersonArrivalEvent
+import org.matsim.api.core.v01.events.PersonDepartureEvent
+import org.matsim.api.core.v01.events.PersonDepartureEvent.ATTRIBUTE_ROUTING_MODE
+import org.matsim.api.core.v01.events.PersonEntersVehicleEvent
 import org.matsim.api.core.v01.events.TransitDriverStartsEvent
+import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler
+import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler
+import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler
+import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler
+import org.matsim.api.core.v01.population.Person
 
 /**
 
  * Output schema (link_records):
- * - vehId, startTime, travelTime, mode
+ * - vehId, startTime, travelTime, mainMode, vehIDList
  */
 class QTripHandler(
     private val targetIter: Int
     ) :
-        VehicleEntersTrafficEventHandler,
-        VehicleLeavesTrafficEventHandler,
-        TransitDriverStartsEventHandler
-    {
-        private var isCollecting = false
-        private var tripMap = mutableMapOf<Id<Vehicle>, QTripData>()
+    PersonDepartureEventHandler,
+    PersonEntersVehicleEventHandler,
+    ActivityStartEventHandler
+{
+    private var isCollecting = false
+    private var tripMap = mutableMapOf<Id<Person>, QTripData>()
 
-        override fun handleEvent(event: TransitDriverStartsEvent) {
-            if (!isCollecting) return
+    override fun handleEvent(event: PersonDepartureEvent) {
+        if (!isCollecting) return
+        if(event.personId.toString().startsWith("pt")) return // Ignore bus driver trips
+        if( tripMap.containsKey(event.personId)) return // departure đâu tiên của 1 trip mới khởi tạo record, nếu nó tồn tại r thì bỏ qua
 
-            tripMap[event.vehicleId] = QTripData(
-                startTime = 0.0,
-                travelTime = 0.0,
-                vehId = event.vehicleId.toString(),
-                mode = "pt" // Mode can be filled in later if needed
+        tripMap[event.personId] = QTripData(
+            personId = event.personId.toString(),
+            startTime = event.time,
+            travelTime = 0.0,
+            mainMode = event.attributes[ATTRIBUTE_ROUTING_MODE]?:"36",
+            vehIDList = mutableListOf()
+        )
+    }
+
+    override fun handleEvent(event: PersonEntersVehicleEvent) {
+        if (!isCollecting) return
+        if(event.personId.toString().startsWith("pt")) return // Ignore bus driver trips
+
+        val existingData = tripMap[event.personId]
+        if (existingData != null) {
+            tripMap[event.personId] = existingData.copy(
+                vehIDList = existingData.vehIDList + event.vehicleId.toString()
             )
         }
 
-        override fun handleEvent(event: VehicleEntersTrafficEvent) {
-            if (!isCollecting) return
+    }
 
-            val existingData = tripMap[event.vehicleId]
-            if (existingData != null && existingData.mode == "pt") {
-                tripMap[event.vehicleId] = existingData.copy(
-                    startTime = event.time
-                )
-            }
-            else{
-                tripMap[event.vehicleId] = QTripData(
-                    startTime = event.time,
-                    travelTime = 0.0,
-                    vehId = event.vehicleId.toString(),
-                    mode = tripMap[event.vehicleId]?.mode ?: event.networkMode // Mode can be filled in later if needed
-                )
-            }
+    override fun handleEvent(event: ActivityStartEvent) {
 
+        if (!isCollecting) return
+        if(event.personId.toString().startsWith("pt")) return // Ignore bus driver trips
+        if (event.actType == "pt interaction") return // Only end of trip
+        if(!tripMap.containsKey(event.personId)) return // if no trip record, ignore
+
+        // Nếu danh sách xe trống (đi bộ thuần túy), thì không ghi file
+        if (tripMap[event.personId]?.vehIDList?.isEmpty() == true) {
+            tripMap.remove(event.personId)
+            return
         }
 
-        override fun handleEvent(event: VehicleLeavesTrafficEvent) {
-            if (!isCollecting) return
+        java.io.File("QTesst/debug/debug_QTripHandler.csv").appendText(
+            "${event.personId}," +
+                    "${tripMap[event.personId]?.startTime }," +
+                    "${(event.time - (tripMap[event.personId]?.startTime ?: event.time))}," +
+                    "${tripMap[event.personId]?.mainMode }," +
+                    "${tripMap[event.personId]?.vehIDList?.joinToString(separator = "|")}\n"
+        )
+        tripMap.remove(event.personId)
+    }
 
-            val existingData = tripMap[event.vehicleId]
-            if (existingData != null)
-            {
-                tripMap[event.vehicleId] = existingData.copy(
-                    travelTime = event.time - (existingData.startTime)
-                )
-            }
-
-            java.io.File("QTesst/debug/debug_QTripHandler.csv").appendText(
-                "${tripMap[event.vehicleId]?.vehId}," +
-                "${tripMap[event.vehicleId]?.startTime}," +
-                "${tripMap[event.vehicleId]?.travelTime}," +
-                "${tripMap[event.vehicleId]?.mode}\n"
-            )
-            tripMap.remove(event.vehicleId)
+    override fun reset(iteration: Int) {
+        isCollecting = (iteration == targetIter)
+        if (isCollecting) {
+            java.io.File("QTesst/debug/debug_QTripHandler.csv").appendText("personId,startTime,travelTime,mainMode,vehIDList\n")
         }
 
-        override fun reset(iteration: Int) {
-            isCollecting = (iteration == targetIter)
-            if(isCollecting) {
-                java.io.File("QTesst/debug/debug_QTripHandler.csv").appendText("vehId,startTime,travelTime,mode\n")
-            }
-
-            tripMap.clear()
-            println("QTripHandler: Iteration $iteration started. Collecting? $isCollecting")
-        }
+        tripMap.clear()
+        println("QTripHandler: Iteration $iteration started. Collecting? $isCollecting")
+    }
 }
