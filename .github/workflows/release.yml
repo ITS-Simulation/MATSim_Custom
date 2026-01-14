@@ -41,7 +41,7 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            build/libs/dist-${{ steps.get_version.outputs.VERSION }}.jar
+            build/libs/dist-*.jar
             data/config/config.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
