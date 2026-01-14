@@ -19,7 +19,7 @@ def run(config: str) -> None:
     # # Step 2: Process extracted data
     # print("Starting data processing...")
     # start = time.perf_counter()
-    # processor = MATSimProcessor(config=config)
+    # processor = BusNetScoreCalculator(config=config)
     # processor.process_matsim_data()
     # print(f"Data processing completed in {time.perf_counter() - start:.2f}s")
     #

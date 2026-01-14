@@ -1,55 +1,73 @@
 package com.thomas.pt.data.writer
 
+import com.thomas.pt.data.model.extractor.BusDelayData
+import com.thomas.pt.data.model.extractor.BusPassengerData
+import com.thomas.pt.data.model.extractor.TripData
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
-import com.thomas.pt.data.model.extractor.BusDelayData
-import com.thomas.pt.data.model.extractor.LinkData
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class MATSimEventWriter(
     scope: CoroutineScope,
-    linkDataPath: File,
-    busDelayDataPath: File,
+    busPaxDataFile: File,
+    busDelayDataFile: File,
+    tripDataFile: File,
     batchSize: Int,
 ): AutoCloseable {
-    private val linkDataChannel = Channel<LinkData>(200_000)
-    private val busDelayChannel = Channel<BusDelayData>(200_000)
+    companion object {
+        const val DEFAULT_CHANNEL_CAPACITY = 200_000
+    }
 
-    private val linkDataWriter = ArrowLinkDataWriter(linkDataPath, batchSize = batchSize)
-    private val busDelayDataWriter = ArrowBusDelayDataWriter(busDelayDataPath, batchSize = batchSize)
+    private val busPassengerDataChannel = Channel<BusPassengerData>(DEFAULT_CHANNEL_CAPACITY)
+    private val busDelayChannel = Channel<BusDelayData>(DEFAULT_CHANNEL_CAPACITY)
+    private val tripDataChannel = Channel<TripData>(DEFAULT_CHANNEL_CAPACITY)
 
-    private val linkWriterJob: Job = scope.launch {
-        linkDataChannel.consumeAsFlow().collect(linkDataWriter::write)
+    private val busPassengerDataWriter = ArrowBusPassengerDataWriter(busPaxDataFile, batchSize)
+    private val busDelayDataWriter = ArrowBusDelayDataWriter(busDelayDataFile, batchSize)
+    private val tripDataWriter = ArrowTripDataWriter(tripDataFile, batchSize)
+
+    private val busPassengerDataWriterJob: Job = scope.launch {
+        busPassengerDataChannel.consumeAsFlow().collect(busPassengerDataWriter::write)
     }
     private val busDelayWriterJob: Job = scope.launch {
         busDelayChannel.consumeAsFlow().collect(busDelayDataWriter::write)
     }
-
-    init {
-        linkDataPath.absoluteFile.parentFile.mkdirs()
-        busDelayDataPath.absoluteFile.parentFile.mkdirs()
+    private val tripWriterJob: Job = scope.launch {
+        tripDataChannel.consumeAsFlow().collect(tripDataWriter::write)
     }
 
-    fun pushLinkData(item: LinkData): Boolean
-        = linkDataChannel.trySend(item).isSuccess
+    init {
+        busPaxDataFile.absoluteFile.parentFile.mkdirs()
+        busDelayDataFile.absoluteFile.parentFile.mkdirs()
+        tripDataFile.absoluteFile.parentFile.mkdirs()
+    }
+
+    fun pushBusPassengerData(item: BusPassengerData): Boolean
+        = busPassengerDataChannel.trySend(item).isSuccess
 
     fun pushBusDelayData(item: BusDelayData): Boolean
         = busDelayChannel.trySend(item).isSuccess
 
+    fun pushTripData(item: TripData): Boolean
+        = tripDataChannel.trySend(item).isSuccess
+
     override fun close() {
-        linkDataChannel.close()
+        busPassengerDataChannel.close()
         busDelayChannel.close()
+        tripDataChannel.close()
 
         runBlocking {
-            linkWriterJob.join()
+            busPassengerDataWriterJob.join()
             busDelayWriterJob.join()
+            tripWriterJob.join()
         }
 
-        linkDataWriter.close()
+        busPassengerDataWriter.close()
         busDelayDataWriter.close()
+        tripDataWriter.close()
     }
 }

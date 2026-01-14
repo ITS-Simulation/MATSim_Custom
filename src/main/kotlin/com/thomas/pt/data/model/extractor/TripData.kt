@@ -1,10 +1,9 @@
 package com.thomas.pt.data.model.extractor
 
-data class QTripData(
+data class TripData(
     val personId: String,
-    val mainMode: String,
     val startTime: Double,
     val travelTime: Double,
-    val vehIDList: List<String>,
-
-    )
+    val mainMode: String,
+    val vehList: List<String>,
+)

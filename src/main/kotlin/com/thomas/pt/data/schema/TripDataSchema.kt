@@ -6,16 +6,20 @@ import org.apache.arrow.vector.types.pojo.Field
 import org.apache.arrow.vector.types.pojo.FieldType
 import org.apache.arrow.vector.types.pojo.Schema
 
-object BusDelayDataSchema {
+object TripDataSchema {
     val schema: Schema = Schema(
         listOf(
-            Field("stop_id", FieldType.notNullable(ArrowType.Utf8.INSTANCE), null),
-            Field("arrival_delay", FieldType.notNullable(
+            Field("person_id", FieldType.notNullable(ArrowType.Utf8.INSTANCE), null),
+            Field("start_time", FieldType.notNullable(
                 ArrowType.FloatingPoint(FloatingPointPrecision.DOUBLE)
             ), null),
-            Field("depart_delay", FieldType.notNullable(
+            Field("travel_time", FieldType.notNullable(
                 ArrowType.FloatingPoint(FloatingPointPrecision.DOUBLE)
             ), null),
+            Field("main_mode", FieldType.notNullable(ArrowType.Utf8.INSTANCE), null),
+            Field("veh_list", FieldType.notNullable(ArrowType.List.INSTANCE), listOf(
+                Field("veh", FieldType.notNullable(ArrowType.Utf8.INSTANCE), null)
+            ))
         )
     )
 }

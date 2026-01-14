@@ -2,18 +2,11 @@ package com.thomas.pt
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.main
-import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.flag
-import com.github.ajalt.clikt.parameters.options.help
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.types.enum
+import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.path
 import com.thomas.pt.core.RunMatsim
-import com.thomas.pt.data.processor.MATSimProcessor
-import com.thomas.pt.data.scoring.AggregationMode
-import com.thomas.pt.data.scoring.LOSCalculator
+import com.thomas.pt.data.scoring.BusNetScoreCalculator
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.LoggerContext
 import org.slf4j.LoggerFactory
@@ -58,18 +51,13 @@ class MATSimRunner: CliktCommand() {
         )
         .help("Log signature (default: hostname)")
 
-    val aggStrategy by option("--agg")
-        .enum<AggregationMode>()
-        .default(AggregationMode.PASSENGER_TIME)
-        .help("Aggregation strategy")
-
     override fun run() {
         System.setProperty("log.file", logFile.absolutePath)
         System.setProperty("log.signature", signature)
-        
+
         val context = LogManager.getContext(false) as LoggerContext
         context.reconfigure()
-        
+
         logger.info("Log file redirected to: {}", logFile.path)
         logger.info("Log signature: {}", signature)
 
@@ -82,8 +70,7 @@ class MATSimRunner: CliktCommand() {
             output.absoluteFile.parentFile.mkdirs()
             if (output.exists()) output.delete()
 
-            MATSimProcessor(yaml).processAll()
-            LOSCalculator(yaml).calculateLOS(aggStrategy, output)
+            BusNetScoreCalculator(yaml).calculateScore(output)
             output.setReadOnly()
         } catch (e: Exception) {
             logger.error("Pipeline failed with a fatal error: ${e.message}", e)

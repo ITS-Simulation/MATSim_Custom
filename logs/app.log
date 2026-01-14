@@ -1,0 +1,153 @@
+2026-01-13 14:54:47.496 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 14:55:52.893 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:08:49.728 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:09:10.622 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:10:58.159 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:11:15.396 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:12:20.829 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:13:09.646 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:15:51.820 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:16:11.241 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:17:13.426 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:18:09.494 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:19:21.043 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:22:10.454 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:22:26.731 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 15:28:04.710 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 16:49:50.105 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 16:50:48.776 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-13 16:52:55.113 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-14 09:51:53.418 [${sys:log.signature}] [main] INFO  RunMatsimV2 - Running MATSim core module
+2026-01-14 10:22:47.241 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 10:22:51.088 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.840668687s
+2026-01-14 10:22:51.122 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 34.047436ms
+2026-01-14 10:28:00.974 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 10:28:04.848 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.866420696s
+2026-01-14 10:28:04.883 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 34.077879ms
+2026-01-14 10:29:20.006 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 15.010981886s
+2026-01-14 10:32:43.076 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 10:32:46.262 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.180387764s
+2026-01-14 10:32:46.299 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 36.488146ms
+2026-01-14 10:34:03.023 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 16.633132495s
+2026-01-14 10:34:58.802 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 10:35:02.023 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.215430723s
+2026-01-14 10:35:02.058 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 33.618461ms
+2026-01-14 10:36:16.048 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 13.895733316s
+2026-01-14 10:36:16.048 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 17.144782500s
+2026-01-14 11:30:56.377 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 11:30:59.974 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.589151449s
+2026-01-14 11:31:00.012 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 37.630743ms
+2026-01-14 11:32:13.452 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 13.333068441s
+2026-01-14 11:32:13.453 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 16.959850633s
+2026-01-14 13:42:31.946 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 13:42:35.269 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.311658425s
+2026-01-14 13:42:35.310 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 40.985476ms
+2026-01-14 13:49:41.184 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 13:49:44.335 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.145050282s
+2026-01-14 13:49:44.374 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 38.209210ms
+2026-01-14 13:51:02.153 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 17.669690506s
+2026-01-14 13:51:02.154 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 20.852949998s
+2026-01-14 13:51:03.343 [${sys:log.signature}] [main] INFO  MATSimProcessor - MATSim data processing completed in 4.810213ms
+2026-01-14 13:51:03.343 [${sys:log.signature}] [main] INFO  MATSimProcessor - MATSim data processing with DataFrame completed in 174.828119ms
+2026-01-14 13:56:29.639 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 13:56:33.123 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.476729446s
+2026-01-14 13:56:33.160 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 37.186400ms
+2026-01-14 13:57:51.012 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 17.744975152s
+2026-01-14 13:57:51.013 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 21.258890998s
+2026-01-14 13:57:51.287 [${sys:log.signature}] [main] INFO  MATSimProcessor - Processing MATSim event data...
+2026-01-14 13:57:51.287 [${sys:log.signature}] [main] INFO  MATSimProcessor - Calculating ridership...
+2026-01-14 13:57:51.293 [${sys:log.signature}] [main] INFO  MATSimProcessor - Calculated ridership: 13.88%
+2026-01-14 13:57:51.293 [${sys:log.signature}] [main] INFO  MATSimProcessor - Calculating on-time performance...
+2026-01-14 13:57:51.296 [${sys:log.signature}] [main] INFO  MATSimProcessor - Calculated on-time performance: 82.69%
+2026-01-14 13:57:51.296 [${sys:log.signature}] [main] INFO  MATSimProcessor - MATSim data processing completed in 8.549009ms
+2026-01-14 16:19:33.764 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 16:19:38.469 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 4.698767108s
+2026-01-14 16:19:38.510 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 40.688452ms
+2026-01-14 16:20:54.819 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 16.212482926s
+2026-01-14 16:20:54.820 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 20.951938486s
+2026-01-14 16:20:55.022 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-14 16:20:55.022 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-14 16:20:55.027 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated ridership: 13.88%
+2026-01-14 16:20:55.027 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-14 16:20:55.028 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 82.69%
+2026-01-14 16:20:55.028 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 6.211582ms
+2026-01-14 16:20:55.029 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - System-wide score: 0.00
+2026-01-14 16:27:06.039 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 16:27:09.551 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.505576919s
+2026-01-14 16:27:09.587 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 35.395549ms
+2026-01-14 16:28:21.786 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 12.130957676s
+2026-01-14 16:28:21.787 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 15.671930144s
+2026-01-14 16:28:21.991 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-14 16:28:21.991 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-14 16:28:21.996 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated ridership: 8.37%
+2026-01-14 16:28:21.996 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-14 16:28:22.002 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 30.08%
+2026-01-14 16:28:22.003 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 11.262263ms
+2026-01-14 16:28:22.003 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - System-wide score: 0.00
+2026-01-14 16:57:46.349 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 16:57:49.872 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.515957829s
+2026-01-14 16:57:49.931 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 58.436176ms
+2026-01-14 16:59:02.265 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 12.247044338s
+2026-01-14 16:59:02.266 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 15.821438343s
+2026-01-14 16:59:02.525 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-14 16:59:02.525 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-14 16:59:02.531 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated ridership: 8.37%
+2026-01-14 16:59:02.531 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-14 16:59:02.534 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 30.08%
+2026-01-14 16:59:02.534 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 9.176757ms
+2026-01-14 16:59:02.534 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - System-wide score: 0.00
+2026-01-14 17:41:49.519 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 17:41:52.804 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.277058421s
+2026-01-14 17:41:52.841 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 36.840167ms
+2026-01-14 17:43:06.860 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 13.898480491s
+2026-01-14 17:43:06.862 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 17.212379079s
+2026-01-14 17:43:07.423 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-14 17:43:07.423 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-14 17:43:07.429 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated ridership: 13.88%
+2026-01-14 17:43:07.429 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-14 17:43:07.430 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 82.69%
+2026-01-14 17:43:07.431 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-14 17:43:07.436 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated travel time ratio: 0.19
+2026-01-14 17:43:07.436 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-14 17:43:07.439 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated travel time score component: 0.19
+2026-01-14 17:43:07.439 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 15.992502ms
+2026-01-14 17:43:07.439 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - System-wide score: 0.39
+2026-01-14 17:44:39.391 [${sys:log.signature}] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 17:44:42.708 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim scenario loaded in 3.311434376s
+2026-01-14 17:44:42.750 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim metadata loaded in 41.601879ms
+2026-01-14 17:45:58.064 [${sys:log.signature}] [main] INFO  RunMatsim - MATSim run completed in 1m 15.210805934s
+2026-01-14 17:45:58.065 [${sys:log.signature}] [main] INFO  RunMatsim - Total execution time: 1m 18.563842189s
+2026-01-14 17:45:58.285 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-14 17:45:58.286 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-14 17:45:58.287 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.05%
+2026-01-14 17:45:58.287 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-14 17:45:58.292 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated ridership: 13.88%
+2026-01-14 17:45:58.292 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-14 17:45:58.294 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 82.69%
+2026-01-14 17:45:58.294 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-14 17:45:58.303 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated travel time ratio: 0.19
+2026-01-14 17:45:58.303 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-14 17:45:58.306 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - Calculated travel time score component: 0.19
+2026-01-14 17:45:58.306 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 20.713443ms
+2026-01-14 17:45:58.306 [${sys:log.signature}] [main] INFO  BusNetScoreCalculator - System-wide score: 0.39
+2026-01-14 17:51:46.408 [ip6-dynamic-adsl.viettel.vn] [main] INFO  MATSimRunner - Log file redirected to: logs/app.log
+2026-01-14 17:51:46.409 [ip6-dynamic-adsl.viettel.vn] [main] INFO  MATSimRunner - Log signature: ip6-dynamic-adsl.viettel.vn
+2026-01-14 17:51:46.441 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-14 17:51:50.032 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - MATSim scenario loaded in 3.588169353s
+2026-01-14 17:51:50.060 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - MATSim metadata loaded in 27.758696ms
+2026-01-14 17:53:05.118 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - MATSim run completed in 1m 14.969116321s
+2026-01-14 17:53:05.119 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - Total execution time: 1m 18.585044370s
+2026-01-14 17:53:05.130 [ip6-dynamic-adsl.viettel.vn] [main] INFO  MATSimRunner - Run time: 1m 18.720053224s
+2026-01-14 17:53:05.297 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-14 17:53:05.297 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-14 17:53:05.297 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.05%
+2026-01-14 17:53:05.298 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-14 17:53:05.301 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated ridership: 13.88%
+2026-01-14 17:53:05.301 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-14 17:53:05.302 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 82.69%
+2026-01-14 17:53:05.302 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-14 17:53:05.308 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated travel time ratio: 0.19
+2026-01-14 17:53:05.308 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-14 17:53:05.312 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated travel time score component: 0.19
+2026-01-14 17:53:05.312 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 14.628582ms
+2026-01-14 17:53:05.312 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - System-wide score: 0.39

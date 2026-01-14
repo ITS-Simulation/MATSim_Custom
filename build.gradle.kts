@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.thomas"
-version = "1.1.2"
+version = "2.0.0"
 
 repositories {
     maven("https://repo.osgeo.org/repository/release/")
@@ -47,6 +47,7 @@ tasks.shadowJar {
     manifest {
         attributes["Main-Class"] = application.mainClass
     }
+    archiveBaseName.set("dist")
     archiveClassifier.set("")
 }
 

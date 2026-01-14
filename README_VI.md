@@ -1,12 +1,12 @@
 # Pipeline Xử Lý Bus MATSim
 [🇬🇧 English](README.md)
 
-Một pipeline Kotlin hiệu năng cao và tính toán điểm Mức độ Phục vụ (Level of Service - LOS) dựa trên tiêu chuẩn TCQSM.
+Một pipeline dựa trên Kotlin để xử lý hậu kỳ và tính toán điểm cho dữ liệu mô phỏng xe buýt MATSim. Sử dụng DuckDB để xử lý dữ liệu hiệu năng cao và tính toán điểm Mức độ Phục vụ (Level of Service - LOS) dựa trên tiêu chuẩn TCQSM, sử dụng Apache Arrow để lưu trữ dữ liệu hiệu quả.
 
 ## Cách Sử Dụng
 
 ### Tải Xuống
-Bạn có thể tải file JAR đã build sẵn từ trang [GitHub Releases](https://github.com/ITS-Simulation/MATSim_Custom/releases).
+Bạn có thể tải file JAR đã build sẵn và file `config.yaml` mặc định từ trang [GitHub Releases](https://github.com/ITS-Simulation/MATSim_Custom/releases).
 
 ### Build
 Hoặc tự build file shadow jar (fat jar):
@@ -17,108 +17,70 @@ Hoặc tự build file shadow jar (fat jar):
 Chạy ứng dụng:
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/Bus_MATSim-1.0-SNAPSHOT.jar \
+  -jar build/libs/dist-2.0.0.jar \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
   --out data/out/final_scores.bin
 ```
 
-**Lưu ý**: Đây chỉ là ví dụ. Bạn có thể thay đổi đường dẫn input/output và các tham số khác theo nhu cầu.
+*__Lưu ý:__ Thay thế `2.0.0` bằng phiên bản thực tế bạn đang sử dụng. Cờ `--add-opens` là bắt buộc để Apache Arrow hoạt động trên JDK 17+.*
 
-### Tham Số Dòng Lệnh (Command Line Arguments)
+### Tham Số Dòng Lệnh
 *   `--cfg`: Đường dẫn đến file cấu hình YAML của ứng dụng (**Bắt buộc**).
-*   `--matsim-cfg`: Đường dẫn đến file cấu hình MATSim (**Bắt buộc**).
+*   `--matsim-cfg`: Đường dẫn đến file cấu hình MATSim XML (**Bắt buộc**).
 *   `--out`: Đường dẫn file kết quả dạng binary (**Bắt buộc**).
-*   `--agg`: Chiến lược tổng hợp. Giá trị: `passenger_time`, `passenger_trip`, `operator_veh_time`, `operator_load` (Mặc định: `passenger_time`).
 *   `--log-file`: Đường dẫn file log tùy chỉnh (Mặc định: `logs/app.log`).
-*   `--matsim-log`: Bật logging của MATSim (Mặc định: `false` - Tắt).
-*   `--signature`: Chữ ký (signature) của worker để ghi log (Mặc định: Hostname).
+*   `--matsim-log`: Bật logging chi tiết của MATSim (Mặc định: `false`).
+*   `--signature`: Chữ ký tùy chỉnh cho log (Mặc định: Hostname).
 
 ## Cấu Hình
-Pipeline được điều khiển bởi một file cấu hình YAML (mặc định: `config.yaml`).
+Pipeline được điều khiển bởi một file cấu hình YAML.
 
 ### Các Phần Chính
-*   **files.data**: Đường dẫn Input/Output cho các file Arrow/CSV.
-*   **scoring**: Các tham số để tính toán LOS (trọng số, ngưỡng, hệ số phạt).
-    *   **wait_ride**: Độ co giãn (elasticity) và thời gian di chuyển cơ sở.
-    *   **amenity**: Sự có mặt của nhà chờ/ghế ngồi.
-    *   **ped_env**: Các thuộc tính vật lý của đường phố (chiều rộng làn, vùng đệm) cho Điểm Người Đi Bộ (Pedestrian Score).
+*   **files -> data**: Định nghĩa đường dẫn input/output cho các bản ghi Arrow được tạo ra.
+*   **scoring -> weights**: Điều chỉnh tầm quan trọng tương đối của các chỉ số dịch vụ khác nhau.
 
-## Logging (Ghi Nhật Ký)
-Ứng dụng sử dụng Log4j2 với cấu hình động. Các mức mặc định là:
-*   **Root**: `WARN` (Ẩn các thư viện ồn ào)
-*   **App**: `INFO` (Hiển thị các bước xử lý chính)
-*   **MATSim**: `ERROR` (Ẩn tất cả cảnh báo từ MATSim khi đọc event)
+## Logic Tính Điểm
+Điểm tổng hợp toàn hệ thống là tổng có trọng số của năm thành phần chính:
 
-### Ghi Đè Mức Log
-Bạn có thể thay đổi mức log khi chạy (runtime) bằng cách sử dụng các thuộc tính hệ thống JVM:
+1.  **Service Coverage (Độ phủ dịch vụ)**: Dựa trên khả năng tiếp cận không gian của phương tiện công cộng.
+2.  **Ridership (Lượng hành khách)**: Tỷ lệ phần trăm tổng dân số sử dụng phương tiện công cộng.
+3.  **On-Time Performance (Hiệu suất đúng giờ)**: Tỷ lệ phần trăm xe buýt đến trong ngưỡng dung sai (sớm/muộn) được định nghĩa trong metadata.
+4.  **Travel Time Score (Điểm thời gian di chuyển)**: Hiệu suất thời gian di chuyển của xe buýt so với mốc cơ sở đã định trước.
+5.  **Transit-Auto Time Ratio (Tỷ lệ thời gian Xe buýt - Ô tô)**: So sánh thời gian di chuyển trung bình của ô tô và xe buýt, ưu tiên các kịch bản mà phương tiện công cộng có tính cạnh tranh.
 
+## Logging
+Ứng dụng sử dụng Log4j2. Bạn có thể ghi đè mức log khi chạy:
 ```bash
-# Debug logic ứng dụng, xem info của MATSim
 java -Dlog.level.app=debug -Dlog.level.matsim=info -jar ...
 ```
-*   `-Dlog.level.root=...`
-*   `-Dlog.level.app=...`
-*   `-Dlog.level.matsim=...`
 
 ## Đầu Ra (Outputs)
-1.  **Trung gian**: `data/temp/merged_los.arrow` (Các chỉ số thô đã qua xử lý)
-2.  **Cuối cùng**: File được chỉ định bởi `--out` (Định dạng Binary), chứa một **Số thực Big-Endian (Double)** duy nhất đại diện cho điểm tổng hợp toàn hệ thống.
+File được chỉ định bởi `--out` chứa đúng **8 bytes** (một số thực Big-Endian Double) đại diện cho điểm tổng hợp cuối cùng.
 
-### Khuyến Nghị Tiêu Chí Tối Ưu
+### Đọc Kết Quả
 
-| Mục Tiêu Tối Ưu                       | Tiêu Chí Tốt Nhất    | Tại Sao?                                                                                    |
-|:--------------------------------------|:---------------------|:--------------------------------------------------------------------------------------------|
-| **Tối Đa Sự Hài Lòng Của Hành Khách** | **`PASSENGER_TIME`** | Tối ưu hóa "hạnh phúc" theo trọng số thời gian. Phạt nặng việc bị kẹt (lãng phí thời gian). |
-| **Tối Đa Lưu Lượng**                  | `PASSENGER_TRIP`     | Tối ưu hóa việc di chuyển người đi xa. Bỏ qua sự chậm trễ do tắc nghẽn.                     |
-| **Tối Thiểu Chi Phí Vận Hành**        | `OPERATOR_VEH_TIME`  | Tối ưu hóa tốc độ/dòng chảy của xe buýt. Bỏ qua việc có ai trên xe hay không.               |
-| **Tối Đa Sử Dụng Tài Sản**            | `OPERATOR_LOAD`      | Tối ưu hóa việc triển khai xe buýt lớn trên các tuyến ngắn, nhanh. (Trừu tượng).            |
-
-### Đọc File Binary Đầu Ra
-File đầu ra chứa chính xác 8 bytes (1 số double 8-byte).
-
-#### Java / Kotlin
+#### Kotlin
 ```kotlin
-import java.io.DataInputStream
-import java.io.FileInputStream
-
-DataInputStream(FileInputStream("final_scores.bin")).use {
-    val score = it.readDouble()
-    println("System-wide LOS Score: $score")
-}
+DataInputStream(FileInputStream("final_scores.bin")).use { println(it.readDouble()) }
 ```
 
 #### Python
 ```python
 import struct
-
 with open("final_scores.bin", "rb") as f:
-    # '>' bắt buộc dùng Big-Endian (định dạng Java), 'd' đọc 1 số double
-    score = struct.unpack(">d", f.read(8))[0]
-    
-print(f"System-wide LOS Score: {score}")
+    print(struct.unpack(">d", f.read(8))[0])
 ```
 
 ## Sử Dụng Docker
-Để chạy ứng dụng này trong Docker (Linux), bạn cần **cài đặt sẵn (pre-install) các extension DuckDB** trong quá trình build. Nếu không, ứng dụng sẽ gặp lỗi nếu container runtime không có kết nối internet.
+Bạn phải cài đặt sẵn extension `arrow` của DuckDB trong quá trình build image để có thể chạy offline.
 
-### Ví Dụ Dockerfile
 ```dockerfile
 FROM azul/zulu-openjdk:21
-
-# 1. Cài đặt DuckDB CLI để tải extension
 RUN apt-get update && apt-get install -y wget unzip \
     && wget https://github.com/duckdb/duckdb/releases/download/v1.1.2/duckdb_cli-linux-amd64.zip \
-    && unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin \
-    && rm duckdb_cli-linux-amd64.zip
-
-# 2. Tải sẵn extension 'arrow' vào /root/.duckdb/extensions/...
-# Bước này chạy 1 lần lúc build, nên lúc chạy (runtime) không cần internet nữa
+    && unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin
 RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
-
-# 3. Copy Ứng Dụng
-COPY build/libs/Bus_MATSim-1.0-SNAPSHOT.jar app.jar
-
-# 4. Chạy
+COPY build/libs/dist-2.0.0.jar app.jar
 ENTRYPOINT ["java", "--add-opens=java.base/java.nio=ALL-UNNAMED", "-jar", "app.jar"]
 ```
