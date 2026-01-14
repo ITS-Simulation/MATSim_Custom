@@ -24,7 +24,8 @@ import java.nio.file.Path
 
 fun main(){
 
-    val config = ConfigUtils.loadConfig("QTesst/data_cottbus/config01.xml")
+    val config = ConfigUtils.loadConfig("QTesst/cottbus-with-pt/config1.xml")
+    config.controller().overwriteFileSetting = OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists
     val scenario = ScenarioUtils.loadScenario(config)
     val controller = Controler(scenario)
     val lastIter = config.controller().lastIteration
