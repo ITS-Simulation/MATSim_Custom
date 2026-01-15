@@ -6,4 +6,5 @@ data class ScoringWeights(
     val travelTime: Double,
     val transitAutoTimeRatio: Double,
     val onTimePerf: Double,
+    val productivity: Double
 )

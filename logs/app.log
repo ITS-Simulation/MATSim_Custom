@@ -151,3 +151,49 @@
 2026-01-14 17:53:05.312 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated travel time score component: 0.19
 2026-01-14 17:53:05.312 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 14.628582ms
 2026-01-14 17:53:05.312 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - System-wide score: 0.39
+2026-01-15 17:37:27.892 [fedora] [main] INFO  MATSimRunner - Log file redirected to: logs/app.log
+2026-01-15 17:37:27.893 [fedora] [main] INFO  MATSimRunner - Log signature: fedora
+2026-01-15 17:37:27.917 [fedora] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-15 17:37:31.708 [fedora] [main] INFO  RunMatsim - MATSim scenario loaded in 3.789639865s
+2026-01-15 17:37:31.743 [fedora] [main] INFO  RunMatsim - MATSim metadata loaded in 34.156411ms
+2026-01-15 17:38:46.810 [fedora] [main] INFO  RunMatsim - MATSim run completed in 1m 14.972910839s
+2026-01-15 17:38:46.811 [fedora] [main] INFO  RunMatsim - Total execution time: 1m 18.796707115s
+2026-01-15 17:38:46.844 [fedora] [main] INFO  MATSimRunner - Run time: 1m 18.950345642s
+2026-01-15 17:38:47.169 [fedora] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-15 17:38:47.169 [fedora] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-15 17:38:47.169 [fedora] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-15 17:38:47.169 [fedora] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-15 17:38:47.173 [fedora] [main] INFO  BusNetScoreCalculator - Calculated ridership: 13.8845%
+2026-01-15 17:38:47.173 [fedora] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-15 17:38:47.174 [fedora] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 82.6916%
+2026-01-15 17:38:47.174 [fedora] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-15 17:38:47.180 [fedora] [main] INFO  BusNetScoreCalculator - Calculated travel time ratio: 0.0136
+2026-01-15 17:38:47.180 [fedora] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-15 17:38:47.184 [fedora] [main] INFO  BusNetScoreCalculator - Calculated travel time score component: 0.0123
+2026-01-15 17:38:47.184 [fedora] [main] INFO  BusNetScoreCalculator - Calculating productivity...
+2026-01-15 17:38:47.189 [fedora] [main] INFO  BusNetScoreCalculator - Calculated productivity score component: 0.8283
+2026-01-15 17:38:47.189 [fedora] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 20.107288ms
+2026-01-15 17:38:47.189 [fedora] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3797
+2026-01-15 17:41:00.390 [fedora] [main] INFO  MATSimRunner - Log file redirected to: logs/app.log
+2026-01-15 17:41:00.391 [fedora] [main] INFO  MATSimRunner - Log signature: fedora
+2026-01-15 17:41:00.420 [fedora] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-15 17:41:03.689 [fedora] [main] INFO  RunMatsim - MATSim scenario loaded in 3.261418018s
+2026-01-15 17:41:03.711 [fedora] [main] INFO  RunMatsim - MATSim metadata loaded in 21.559547ms
+2026-01-15 17:42:16.822 [fedora] [main] INFO  RunMatsim - MATSim run completed in 1m 13.011655070s
+2026-01-15 17:42:16.823 [fedora] [main] INFO  RunMatsim - Total execution time: 1m 16.294632635s
+2026-01-15 17:42:16.858 [fedora] [main] INFO  MATSimRunner - Run time: 1m 16.465879204s
+2026-01-15 17:42:17.071 [fedora] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-15 17:42:17.071 [fedora] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-15 17:42:17.071 [fedora] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-15 17:42:17.072 [fedora] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-15 17:42:17.076 [fedora] [main] INFO  BusNetScoreCalculator - Calculated ridership: 13.8845%
+2026-01-15 17:42:17.076 [fedora] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-15 17:42:17.078 [fedora] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 82.6916%
+2026-01-15 17:42:17.078 [fedora] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-15 17:42:17.088 [fedora] [main] INFO  BusNetScoreCalculator - Calculated travel time ratio: 0.0136
+2026-01-15 17:42:17.088 [fedora] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-15 17:42:17.090 [fedora] [main] INFO  BusNetScoreCalculator - Calculated travel time score component: 0.0123
+2026-01-15 17:42:17.090 [fedora] [main] INFO  BusNetScoreCalculator - Calculating productivity...
+2026-01-15 17:42:17.095 [fedora] [main] INFO  BusNetScoreCalculator - Calculated productivity score component: 0.8283
+2026-01-15 17:42:17.095 [fedora] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 24.187404ms
+2026-01-15 17:42:17.095 [fedora] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3797
