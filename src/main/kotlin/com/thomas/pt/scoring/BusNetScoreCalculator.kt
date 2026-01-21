@@ -153,7 +153,8 @@ class BusNetScoreCalculator(
     private fun computeScore(
         weight: Double,
         scoreName: String,
-        calculator: () -> Double
+        calculator: () -> Double,
+        logOriginal: Boolean = true
     ): Double =
         if (weight > 0) {
             logger.info("Calculating {}...", scoreName)
@@ -161,7 +162,8 @@ class BusNetScoreCalculator(
                 logger.error("Error calculating {}: {}", scoreName, e.message)
                 exitProcess(1)
             }
-            logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
+            if (logOriginal) logger.info("Calculated {}: {}", scoreName, "%.4f".format(score))
+            else logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
             score
         } else 0.0
 
@@ -173,8 +175,8 @@ class BusNetScoreCalculator(
             val serviceCoverage = metadata.serviceCoverage
             logger.info("Calculated service coverage: {}%", "%.4f".format(serviceCoverage * 100))
 
-            val ridership = computeScore(scoringWeights.ridership, "ridership", ::calculateRidership)
-            val onTimePerf = computeScore(scoringWeights.onTimePerf, "on-time performance", ::calculateOnTimePerf)
+            val ridership = computeScore(scoringWeights.ridership, "ridership", ::calculateRidership, false)
+            val onTimePerf = computeScore(scoringWeights.onTimePerf, "on-time performance", ::calculateOnTimePerf, false)
             val travelTimeRatio = computeScore(scoringWeights.transitAutoTimeRatio, "transit-auto travel time ratio", ::calculateTravelTimeRatio)
             val travelTime = computeScore(scoringWeights.travelTime, "travel time", ::calculateTravelTime)
             val productivity = computeScore(scoringWeights.productivity, "productivity", ::calculateProductivity)

@@ -103,8 +103,10 @@ object MATSimMetadataStore {
         // Extract vehicle type mapping (bus/non-bus)
         val (bus, blacklist) = transitVehicles.vehicles.values
             .partition { vehicle ->
-                busMarkers.any { mark -> "${vehicle.type.id}".contains(mark) }
+                busMarkers.any { mark -> "${vehicle.type.id}".contains(mark, true) }
             }
+        println(bus.map{it.id.toString()})
+        println(blacklist.map{it.id.toString()})
 
         _metadata = MATSimMetadata(
             totalPopulation = plan.persons.size,
