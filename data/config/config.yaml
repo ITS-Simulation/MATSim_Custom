@@ -1,19 +1,17 @@
-mode: debug
-
 matsim:
-  bus_type_prefix: "bus"  # Prefix for vehicle TYPE names in transitVehicles.xml
+  bus_type:  # Marker for vehicle TYPE names in MATSim transit vehicle config
+    - "bus"
   bus_transport_modes:    # Transport modes to filter for buses (matches any)
     - "bus"
     - "pt"
 
 files:
   data: # These files are internal only. No need to change it
-    bus_pax_records: "data/temp/bus_pax_records.arrow"
-    bus_delay_records: "data/temp/bus_delay_records.arrow"
-    trip_records: "data/temp/trip_records.arrow"
+    bus_pax_records: "data/temp/bus_pax_records"
+    bus_delay_records: "data/temp/bus_delay_records"
+    trip_records: "data/temp/trip_records"
 
-arrow:
-  batch_size: 50000
+batch_size: 50000
 
 scoring:
   params:
@@ -29,7 +27,3 @@ scoring:
     transit_auto_time_ratio: 0.1625
     on_time_performance: 0.1625
     productivity: 0.125
-
-
-
-

@@ -1,12 +1,13 @@
 package com.thomas.pt.core
 
-import com.thomas.pt.data.metadata.MATSimMetadataStore
-import com.thomas.pt.data.metadata.NetworkBoundaries
-import com.thomas.pt.data.writer.MATSimEventWriter
-import com.thomas.pt.event.BusDelayHandler
-import com.thomas.pt.event.BusPassengerHandler
-import com.thomas.pt.event.TripHandler
-import com.thomas.pt.utility.Utility
+import com.thomas.pt.extractor.metadata.MATSimMetadataStore
+import com.thomas.pt.model.metadata.NetworkBoundaries
+import com.thomas.pt.writer.core.MATSimEventWriter
+import com.thomas.pt.extractor.online.BusDelayHandler
+import com.thomas.pt.extractor.online.BusPassengerHandler
+import com.thomas.pt.extractor.online.TripHandler
+import com.thomas.pt.utils.Utility
+import com.thomas.pt.writer.core.WriterFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,13 +17,13 @@ import org.matsim.core.config.ConfigUtils
 import org.matsim.core.config.groups.ControllerConfigGroup
 import org.matsim.core.controler.AbstractModule
 import org.matsim.core.controler.Controler
-import org.matsim.core.controler.OutputDirectoryHierarchy
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting
 import org.matsim.core.scenario.ScenarioUtils
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
 import java.nio.file.Path
+import kotlin.time.Duration
 import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
 
@@ -39,23 +40,64 @@ object RunMatsim {
             )
         }
 
+    fun extractMetadata(
+        yaml: Path,
+        matsim: Path,
+    ): Duration {
+        val config = loadConfig(matsim)
+        val controller = Controler(ScenarioUtils.loadScenario(config))
+        return extractMetadata(
+            yamlConfig = Utility.loadYaml(yaml),
+            controller = controller
+        )
+    }
+
+    private fun extractMetadata(
+        yamlConfig: Map<String, Any>,
+        controller: Controler
+    ): Duration =
+        measureTime {
+            MATSimMetadataStore.build(
+                yamlConfig = yamlConfig,
+                netBound = getNetworkBoundary(controller.scenario.network),
+                plan = controller.scenario.population,
+                schedule = controller.scenario.transitSchedule,
+                transitVehicles = controller.scenario.transitVehicles,
+            )
+        }
+
     @Suppress("unused")
     fun createConfig(out: String) = ConfigUtils.writeConfig(ConfigUtils.createConfig(), out)
 
     fun loadConfig(configFile: Path): Config = ConfigUtils.loadConfig(configFile.toString())
 
-    fun run(configPath: Path, matsimConfig: Path, log: Boolean)
-        = run(Utility.loadYaml(configPath), matsimConfig, log)
+    fun simpleRun(configPath: Path) {
+        val config = loadConfig(configPath)
 
-    fun run(yamlConfig: Map<String, Any>, matsimConfigPath: Path, log: Boolean) {
+        config.controller().apply {
+            overwriteFileSetting = OverwriteFileSetting.deleteDirectoryIfExists
+
+            val parentDir = configPath.toAbsolutePath().normalize().parent
+            outputDirectory = "${parentDir.resolve(outputDirectory)}"
+        }
+
+        val controller = Controler(ScenarioUtils.loadScenario(config))
+        controller.run()
+    }
+
+    fun run(configPath: Path, matsimConfig: Path, log: Boolean, format: WriterFormat)
+        = run(Utility.loadYaml(configPath), matsimConfig, log, format)
+
+    fun run(yamlConfig: Map<String, Any>, matsimConfigPath: Path, log: Boolean, format: WriterFormat) {
         logger.info("Running MATSim core module")
 
         val (matsim, loadTime) = measureTimedValue {
             val matsimConfig = loadConfig(matsimConfigPath)
             val lastIteration = matsimConfig.controller().lastIteration
 
-            matsimConfig.controller().overwriteFileSetting = OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists
             matsimConfig.controller().apply {
+                overwriteFileSetting = OverwriteFileSetting.deleteDirectoryIfExists
+
                 val parentDir = matsimConfigPath.toAbsolutePath().normalize().parent
                 outputDirectory = "${parentDir.resolve(outputDirectory)}"
             }
@@ -81,32 +123,19 @@ object RunMatsim {
         logger.info("MATSim scenario loaded in $loadTime")
         val (controller, lastIteration) = matsim
 
-        val metadataTime = measureTime {
-            MATSimMetadataStore.build(
-                yamlConfig = yamlConfig,
-                netBound = getNetworkBoundary(controller.scenario.network),
-                plan = controller.scenario.population,
-                schedule = controller.scenario.transitSchedule,
-                transitVehicles = controller.scenario.transitVehicles,
-            )
-        }
+        val metadataTime = extractMetadata(yamlConfig, controller)
         logger.info("MATSim metadata loaded in $metadataTime")
 
-        val arrowBatchConfig = Utility.getYamlSubconfig(yamlConfig, "arrow").let{
-            it["batch_size"] as Int
-        }
-
+        val batchConfig = yamlConfig["batch_size"] as Int
         val dataOutConfig = Utility.getYamlSubconfig(yamlConfig, "files", "data")
-        val busPassengerDataOut = File(dataOutConfig["bus_pax_records"] as String)
-        val busDelayDataOut = File(dataOutConfig["bus_delay_records"] as String)
-        val tripDataOut = File(dataOutConfig["trip_records"] as String)
 
         MATSimEventWriter(
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-            batchSize = arrowBatchConfig,
-            busPaxDataFile = busPassengerDataOut,
-            busDelayDataFile = busDelayDataOut,
-            tripDataFile = tripDataOut,
+            batchSize = batchConfig,
+            busPaxData = dataOutConfig["bus_pax_records"] as String,
+            busDelayData = dataOutConfig["bus_delay_records"] as String,
+            tripData = dataOutConfig["trip_records"] as String,
+            format = format
         ).use { eventWriter ->
             val busPassengerHandler = BusPassengerHandler(
                 targetIter = lastIteration,

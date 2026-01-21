@@ -1,0 +1,193 @@
+package com.thomas.pt.scoring
+
+import com.thomas.pt.db.DuckDBManager
+import com.thomas.pt.extractor.metadata.MATSimMetadataStore
+import com.thomas.pt.utils.Utility
+import com.thomas.pt.writer.core.WriterFormat
+import org.slf4j.LoggerFactory
+import java.io.DataOutputStream
+import java.io.File
+import java.nio.file.Path
+import kotlin.math.exp
+import kotlin.system.exitProcess
+import kotlin.time.measureTimedValue
+
+class BusNetScoreCalculator(
+    configPath: Path,
+    format: WriterFormat
+) : AutoCloseable {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val db = DuckDBManager()
+
+    private val busPassengerRecords: String
+    private val busDelayRecords: String
+    private val tripRecords: String
+
+    private val metadata by lazy { MATSimMetadataStore.metadata }
+
+    private val scoringWeights: ScoringWeights
+
+    init {
+        val yamlConfig = Utility.loadYaml(configPath)
+        Utility.getYamlSubconfig(yamlConfig, "files", "data").let {
+            busPassengerRecords = format.resolveExtension(
+                it["bus_pax_records"] as String
+            ).let { file ->
+                when (format) {
+                    WriterFormat.ARROW -> "read_arrow('$file')"
+                    WriterFormat.CSV -> """
+                        read_csv('$file', 
+                            header=true, 
+                            columns={
+                                person_id: VARCHAR,
+                                bus_id: VARCHAR,
+                            }
+                        )
+                        """.trimIndent()
+                }
+            }
+            busDelayRecords = format.resolveExtension(
+                it["bus_delay_records"] as String
+            ).let { file ->
+                when (format) {
+                    WriterFormat.ARROW -> "read_arrow('$file')"
+                    WriterFormat.CSV -> """
+                        read_csv('$file', 
+                            header=true, 
+                            columns={
+                                stop_id: VARCHAR,
+                                arrival_delay: DOUBLE,
+                                depart_delay: DOUBLE
+                            }
+                        )
+                        """.trimIndent()
+                }
+
+            }
+            tripRecords = format.resolveExtension(
+                it["trip_records"] as String
+            ).let { file ->
+                when (format) {
+                    WriterFormat.ARROW -> "read_arrow('$file')"
+                    WriterFormat.CSV -> """
+                        read_csv('$file', 
+                            header=true, 
+                            columns={
+                                person_id: VARCHAR,
+                                start_time: DOUBLE,
+                                travel_time: DOUBLE,
+                                main_mode: VARCHAR,
+                                veh_list: 'VARCHAR[]'
+                            }
+                        )
+                        """.trimIndent()
+                }
+            }
+        }
+        Utility.getYamlSubconfig(yamlConfig, "scoring", "weights").let {
+            scoringWeights = ScoringWeights(
+                serviceCoverage = it["service_coverage"] as Double,
+                ridership = it["ridership"] as Double,
+                travelTime = it["travel_time"] as Double,
+                transitAutoTimeRatio = it["transit_auto_time_ratio"] as Double,
+                onTimePerf = it["on_time_performance"] as Double,
+                productivity = it["productivity"] as Double,
+            )
+        }
+    }
+
+    override fun close() = db.close()
+
+    private fun calculateRidership(): Double = db.queryScalar(
+        "SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords"
+    ) / metadata.totalPopulation
+
+    private fun calculateOnTimePerf(): Double = db.queryScalar(
+        """
+            WITH on_time_data AS (
+                SELECT * FROM $busDelayRecords
+            )
+            SELECT
+                COUNT_IF(
+                    arrival_delay >= ${-60 * metadata.earlyHeadwayTolerance}
+                    AND arrival_delay <= ${60 * metadata.lateHeadwayTolerance}
+                ) * 1.0 / COUNT(arrival_delay) AS on_time_ratio
+            FROM on_time_data
+        """.trimIndent()
+    )
+
+    private fun calculateTravelTimeRatio(): Double = exp(
+        -db.queryScalar(
+            """
+                SELECT
+                    (COALESCE(AVG(travel_time) FILTER (WHERE main_mode = 'pt'), 1e9) /
+                    COALESCE(AVG(travel_time) FILTER (WHERE main_mode = 'car'), 1.0)) AS tt_ratio
+                FROM $tripRecords
+                WHERE main_mode IN ('pt', 'car')
+            """.trimIndent()
+        )
+    )
+
+    private fun calculateTravelTime(): Double = exp(
+        -db.queryScalar(
+            """
+                SELECT
+                    (COALESCE(AVG(travel_time), 1e9) / ${60.0 * metadata.travelTimeBaseline}) AS travel_time_score
+                FROM $tripRecords
+                WHERE main_mode = 'pt'
+            """.trimIndent()
+        )
+    )
+
+    private fun calculateProductivity(): Double = exp(
+        -db.queryScalar(
+            """
+                SELECT 
+                    COALESCE(${metadata.totalServiceHours} / NULLIF(COUNT(DISTINCT person_id), 0), 1e9)
+                FROM $busPassengerRecords
+            """.trimIndent()
+        )
+    )
+
+    private fun computeScore(
+        weight: Double,
+        scoreName: String,
+        calculator: () -> Double
+    ): Double =
+        if (weight > 0) {
+            logger.info("Calculating {}...", scoreName)
+            val score = try { calculator() } catch (e: Exception) {
+                logger.error("Error calculating {}: {}", scoreName, e.message)
+                exitProcess(1)
+            }
+            logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
+            score
+        } else 0.0
+
+    fun calculateScore(out: File) {
+        val (score, time) = measureTimedValue {
+            logger.info("Processing MATSim event data...")
+
+            logger.info("Calculating service coverage...")
+            val serviceCoverage = metadata.serviceCoverage
+            logger.info("Calculated service coverage: {}%", "%.4f".format(serviceCoverage * 100))
+
+            val ridership = computeScore(scoringWeights.ridership, "ridership", ::calculateRidership)
+            val onTimePerf = computeScore(scoringWeights.onTimePerf, "on-time performance", ::calculateOnTimePerf)
+            val travelTimeRatio = computeScore(scoringWeights.transitAutoTimeRatio, "transit-auto travel time ratio", ::calculateTravelTimeRatio)
+            val travelTime = computeScore(scoringWeights.travelTime, "travel time", ::calculateTravelTime)
+            val productivity = computeScore(scoringWeights.productivity, "productivity", ::calculateProductivity)
+
+            scoringWeights.serviceCoverage * serviceCoverage +
+                    scoringWeights.ridership * ridership +
+                    scoringWeights.onTimePerf * onTimePerf +
+                    scoringWeights.travelTime * travelTime +
+                    scoringWeights.transitAutoTimeRatio * travelTimeRatio +
+                    scoringWeights.productivity * productivity
+        }
+        logger.info("MATSim data processing & Score calculation completed in $time")
+        logger.info("System-wide score: %.4f".format(score))
+        DataOutputStream(out.outputStream()).use { it.writeDouble(score) }
+    }
+}

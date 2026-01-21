@@ -197,3 +197,356 @@
 2026-01-15 17:42:17.095 [fedora] [main] INFO  BusNetScoreCalculator - Calculated productivity score component: 0.8283
 2026-01-15 17:42:17.095 [fedora] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 24.187404ms
 2026-01-15 17:42:17.095 [fedora] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3797
+2026-01-19 08:43:30.357 [ip6-dynamic-adsl.viettel.vn] [main] INFO  MATSimRunner - Log file redirected to: logs/app.log
+2026-01-19 08:43:30.359 [ip6-dynamic-adsl.viettel.vn] [main] INFO  MATSimRunner - Log signature: ip6-dynamic-adsl.viettel.vn
+2026-01-19 08:43:30.431 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-19 08:43:34.803 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - MATSim scenario loaded in 4.370511755s
+2026-01-19 08:43:34.828 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - MATSim metadata loaded in 24.956345ms
+2026-01-19 08:44:15.047 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - MATSim run completed in 40.088720774s
+2026-01-19 08:44:15.049 [ip6-dynamic-adsl.viettel.vn] [main] INFO  RunMatsim - Total execution time: 44.484188874s
+2026-01-19 08:44:15.064 [ip6-dynamic-adsl.viettel.vn] [main] INFO  MATSimRunner - Run time: 44.704569581s
+2026-01-19 08:44:15.314 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-19 08:44:15.314 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-19 08:44:15.314 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-19 08:44:15.314 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-19 08:44:15.318 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated ridership: 11.2210%
+2026-01-19 08:44:15.318 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-19 08:44:15.319 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 69.1393%
+2026-01-19 08:44:15.319 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-19 08:44:15.325 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated travel time ratio: 0.0854
+2026-01-19 08:44:15.325 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-19 08:44:15.327 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated travel time score component: 0.0313
+2026-01-19 08:44:15.327 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculating productivity...
+2026-01-19 08:44:15.335 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - Calculated productivity score component: 0.7921
+2026-01-19 08:44:15.335 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 21.496285ms
+2026-01-19 08:44:15.335 [ip6-dynamic-adsl.viettel.vn] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3478
+2026-01-21 08:28:39.730 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:28:39.731 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:28:39.761 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:28:43.362 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 3.597358362s
+2026-01-21 08:28:43.394 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 31.639279ms
+2026-01-21 08:28:43.424 [Thomas] [main] ERROR Simulation - Pipeline failed with a fatal error: null
+java.lang.NullPointerException
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:221)
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:179)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.writeHeader(CSVBusPassengerDataWriter.kt:17)
+	at com.thomas.pt.writer.csv.CSVBatchWriter.<init>(CSVBatchWriter.kt:8)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.<init>(CSVBusPassengerDataWriter.kt:10)
+	at com.thomas.pt.writer.core.MATSimEventWriter.<init>(MATSimEventWriter.kt:62)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:144)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:101)
+	at com.thomas.pt.Simulation.run(Main.kt:92)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.parse(CoreCliktCommand.kt:107)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:78)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:90)
+	at com.thomas.pt.MainKt.main(Main.kt:199)
+2026-01-21 08:30:47.789 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:30:47.791 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:30:47.822 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:30:51.243 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 3.419281263s
+2026-01-21 08:30:51.269 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 26.014612ms
+2026-01-21 08:30:51.294 [Thomas] [main] ERROR Simulation - Pipeline failed with a fatal error: null
+java.lang.NullPointerException
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:221)
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:179)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.writeHeader(CSVBusPassengerDataWriter.kt:17)
+	at com.thomas.pt.writer.csv.CSVBatchWriter.<init>(CSVBatchWriter.kt:8)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.<init>(CSVBusPassengerDataWriter.kt:10)
+	at com.thomas.pt.writer.core.MATSimEventWriter.<init>(MATSimEventWriter.kt:62)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:144)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:101)
+	at com.thomas.pt.Simulation.run(Main.kt:92)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.parse(CoreCliktCommand.kt:107)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:78)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:90)
+	at com.thomas.pt.MainKt.main(Main.kt:199)
+2026-01-21 08:32:11.400 [Thomas] [main] INFO  Simulation - false
+2026-01-21 08:32:11.410 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:32:11.411 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:32:11.469 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:32:14.895 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 3.424908173s
+2026-01-21 08:32:14.918 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 22.842419ms
+2026-01-21 08:32:14.933 [Thomas] [main] ERROR Simulation - Pipeline failed with a fatal error: null
+java.lang.NullPointerException
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:221)
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:179)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.writeHeader(CSVBusPassengerDataWriter.kt:17)
+	at com.thomas.pt.writer.csv.CSVBatchWriter.<init>(CSVBatchWriter.kt:8)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.<init>(CSVBusPassengerDataWriter.kt:10)
+	at com.thomas.pt.writer.core.MATSimEventWriter.<init>(MATSimEventWriter.kt:62)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:144)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:101)
+	at com.thomas.pt.Simulation.run(Main.kt:93)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.parse(CoreCliktCommand.kt:107)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:78)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:90)
+	at com.thomas.pt.MainKt.main(Main.kt:200)
+2026-01-21 08:33:21.052 [Thomas] [main] INFO  Simulation - true
+2026-01-21 08:33:21.063 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:33:21.063 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:33:21.093 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:33:24.399 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 3.304549954s
+2026-01-21 08:33:24.421 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 21.983269ms
+2026-01-21 08:33:24.436 [Thomas] [main] ERROR Simulation - Pipeline failed with a fatal error: null
+java.lang.NullPointerException
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:221)
+	at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:179)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.writeHeader(CSVBusPassengerDataWriter.kt:17)
+	at com.thomas.pt.writer.csv.CSVBatchWriter.<init>(CSVBatchWriter.kt:8)
+	at com.thomas.pt.writer.csv.CSVBusPassengerDataWriter.<init>(CSVBusPassengerDataWriter.kt:10)
+	at com.thomas.pt.writer.core.MATSimEventWriter.<init>(MATSimEventWriter.kt:62)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:144)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:101)
+	at com.thomas.pt.Simulation.run(Main.kt:93)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.parse(CoreCliktCommand.kt:107)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:78)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:90)
+	at com.thomas.pt.MainKt.main(Main.kt:200)
+2026-01-21 08:39:25.348 [Thomas] [main] INFO  Simulation - true
+2026-01-21 08:39:25.361 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:39:25.361 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:39:25.397 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:39:30.049 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 4.651050904s
+2026-01-21 08:39:30.074 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 24.448397ms
+2026-01-21 08:40:05.806 [Thomas] [main] ERROR Simulation - Pipeline failed with a fatal error: java.lang.InterruptedException
+java.lang.RuntimeException: java.lang.InterruptedException
+	at org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineWithThreadpool.run(QNetsimEngineWithThreadpool.java:108)
+	at org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.doSimStep(AbstractQNetsimEngine.java:217)
+	at org.matsim.core.mobsim.qsim.QSim.doSimStep(QSim.java:397)
+	at org.matsim.core.mobsim.qsim.QSim.run(QSim.java:245)
+	at org.matsim.core.controler.NewControler.runMobSim(NewControler.java:125)
+	at org.matsim.core.controler.AbstractController$8.run(AbstractController.java:214)
+	at org.matsim.core.controler.AbstractController.iterationStep(AbstractController.java:246)
+	at org.matsim.core.controler.AbstractController.mobsim(AbstractController.java:210)
+	at org.matsim.core.controler.AbstractController.iteration(AbstractController.java:157)
+	at org.matsim.core.controler.AbstractController.doIterations(AbstractController.java:124)
+	at org.matsim.core.controler.AbstractController$1.run(AbstractController.java:84)
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:71)
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:54)
+	at org.matsim.core.controler.AbstractController.run(AbstractController.java:92)
+	at org.matsim.core.controler.NewControler.run(NewControler.java:83)
+	at org.matsim.core.controler.Controler.run(Controler.java:263)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:180)
+	at com.thomas.pt.core.RunMatsim.run(RunMatsim.kt:101)
+	at com.thomas.pt.Simulation.run(Main.kt:93)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.parse(CoreCliktCommand.kt:107)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:78)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:90)
+	at com.thomas.pt.MainKt.main(Main.kt:200)
+Caused by: java.lang.InterruptedException
+	at java.base/java.util.concurrent.FutureTask.awaitDone(FutureTask.java:471)
+	at java.base/java.util.concurrent.FutureTask.get(FutureTask.java:190)
+	at java.base/java.util.concurrent.AbstractExecutorService.invokeAll(AbstractExecutorService.java:252)
+	at org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineWithThreadpool.run(QNetsimEngineWithThreadpool.java:98)
+	... 22 more
+2026-01-21 08:43:04.920 [Thomas] [main] INFO  Simulation - true
+2026-01-21 08:43:04.932 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:43:04.932 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:43:04.951 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:43:07.815 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 2.862572764s
+2026-01-21 08:43:07.840 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 23.986094ms
+2026-01-21 08:43:53.996 [Thomas] [main] INFO  RunMatsim - MATSim run completed in 45.991391313s
+2026-01-21 08:43:53.996 [Thomas] [main] INFO  RunMatsim - Total execution time: 48.877950171s
+2026-01-21 08:43:53.999 [Thomas] [main] INFO  Simulation - Run time: 49.066836925s
+2026-01-21 08:43:54.203 [Thomas] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-21 08:43:54.203 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-21 08:43:54.203 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-21 08:43:54.203 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-21 08:43:54.207 [Thomas] [main] ERROR BusNetScoreCalculator - Error calculating ridership: Invalid Input Error: Error when sniffing file "data/temp/bus_pax_records.csv".
+It was not possible to automatically detect the CSV parsing dialect
+The search space used was:
+Delimiter Candidates: ',', '|', ';', '	'
+Quote/Escape Candidates: ['(no quote)','(no escape)'],['"','(no escape)'],['"','"'],['"','''],['"','\'],[''','(no escape)'],[''','''],[''','"'],[''','\']
+Comment Candidates: '\0', '#'
+Encoding: utf-8
+Possible fixes:
+* Disable the parser's strict mode (strict_mode=false) to allow reading rows that do not comply with the CSV standard.
+* Columns are set as: "columns = { 'person_id' : 'VARCHAR', 'bus_id' : 'VARCHAR'}", and they contain: 2 columns. It does not match the number of columns found by the sniffer: 3. Verify the columns parameter is correctly set.
+* Make sure you are using the correct file encoding. If not, set it (e.g., encoding = 'utf-16').
+* Set delimiter (e.g., delim=',')
+* Set quote (e.g., quote='"')
+* Set escape (e.g., escape='"')
+* Set comment (e.g., comment='#')
+* Set skip (skip=${n}) to skip ${n} lines at the top of the file
+* Enable ignore errors (ignore_errors=true) to ignore potential errors
+* Enable null padding (null_padding=true) to pad missing columns with NULL values
+* Check you are using the correct file compression, otherwise set it (e.g., compression = 'zstd')
+* Be sure that the maximum line size is set to an appropriate value, otherwise set it (e.g., max_line_size=10000000)
+
+
+LINE 1: SELECT COUNT(DISTINCT person_id) FROM read_csv('data/temp/bus_pax_records.csv', 
+                                              ^
+2026-01-21 08:47:17.171 [Thomas] [main] INFO  Simulation - true
+2026-01-21 08:47:17.182 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:47:17.182 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:47:17.202 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:47:20.306 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 3.102262468s
+2026-01-21 08:47:20.331 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 24.964960ms
+2026-01-21 08:48:10.308 [Thomas] [main] INFO  RunMatsim - MATSim run completed in 49.806907027s
+2026-01-21 08:48:10.309 [Thomas] [main] INFO  RunMatsim - Total execution time: 52.934134455s
+2026-01-21 08:48:10.345 [Thomas] [main] INFO  Simulation - Run time: 53.162737031s
+2026-01-21 08:48:10.720 [Thomas] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-21 08:48:10.720 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-21 08:48:10.720 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-21 08:48:10.721 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-21 08:48:10.727 [Thomas] [main] ERROR BusNetScoreCalculator - Error calculating ridership: Invalid Input Error: Error when sniffing file "data/temp/bus_pax_records.csv".
+It was not possible to automatically detect the CSV parsing dialect
+The search space used was:
+Delimiter Candidates: ',', '|', ';', '	'
+Quote/Escape Candidates: ['(no quote)','(no escape)'],['"','(no escape)'],['"','"'],['"','''],['"','\'],[''','(no escape)'],[''','''],[''','"'],[''','\']
+Comment Candidates: '\0', '#'
+Encoding: utf-8
+Possible fixes:
+* Disable the parser's strict mode (strict_mode=false) to allow reading rows that do not comply with the CSV standard.
+* Columns are set as: "columns = { 'person_id' : 'VARCHAR', 'bus_id' : 'VARCHAR'}", and they contain: 2 columns. It does not match the number of columns found by the sniffer: 3. Verify the columns parameter is correctly set.
+* Make sure you are using the correct file encoding. If not, set it (e.g., encoding = 'utf-16').
+* Set delimiter (e.g., delim=',')
+* Set quote (e.g., quote='"')
+* Set escape (e.g., escape='"')
+* Set comment (e.g., comment='#')
+* Set skip (skip=${n}) to skip ${n} lines at the top of the file
+* Enable ignore errors (ignore_errors=true) to ignore potential errors
+* Enable null padding (null_padding=true) to pad missing columns with NULL values
+* Check you are using the correct file compression, otherwise set it (e.g., compression = 'zstd')
+* Be sure that the maximum line size is set to an appropriate value, otherwise set it (e.g., max_line_size=10000000)
+
+
+LINE 1: SELECT COUNT(DISTINCT person_id) FROM read_csv('data/temp/bus_pax_records.csv', 
+                                              ^
+2026-01-21 08:49:30.714 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 08:49:30.714 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 08:49:30.747 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 08:49:33.722 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 2.973077395s
+2026-01-21 08:49:33.752 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 29.925997ms
+2026-01-21 08:50:25.546 [Thomas] [main] INFO  RunMatsim - MATSim run completed in 51.599806405s
+2026-01-21 08:50:25.547 [Thomas] [main] INFO  RunMatsim - Total execution time: 54.602809797s
+2026-01-21 08:50:25.607 [Thomas] [main] INFO  Simulation - Run time: 54.892303569s
+2026-01-21 08:50:26.165 [Thomas] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-21 08:50:26.165 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-21 08:50:26.166 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-21 08:50:26.166 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-21 08:50:26.183 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated ridership: 11.2210%
+2026-01-21 08:50:26.183 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-21 08:50:26.201 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 69.1393%
+2026-01-21 08:50:26.201 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-21 08:50:26.202 [Thomas] [main] ERROR BusNetScoreCalculator - Error calculating transit-auto travel time ratio: Parser Error: syntax error at or near "]"
+
+LINE 11:         veh_list: VARCHAR[]
+                                   ^
+2026-01-21 09:00:19.393 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 09:00:19.394 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 09:00:19.427 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 09:00:23.369 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 3.940770575s
+2026-01-21 09:00:23.405 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 35.021377ms
+2026-01-21 09:00:49.862 [Thomas] [main] INFO  Simulation - Log file redirected to: logs/app.log
+2026-01-21 09:00:49.863 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-21 09:00:49.885 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-21 09:00:53.055 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 3.167768286s
+2026-01-21 09:00:53.084 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 28.371635ms
+2026-01-21 09:01:42.391 [Thomas] [main] INFO  RunMatsim - MATSim run completed in 49.095605494s
+2026-01-21 09:01:42.392 [Thomas] [main] INFO  RunMatsim - Total execution time: 52.291745415s
+2026-01-21 09:01:42.421 [Thomas] [main] INFO  Simulation - Run time: 52.557980690s
+2026-01-21 09:01:42.633 [Thomas] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-21 09:01:42.633 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-21 09:01:42.633 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-21 09:01:42.633 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-21 09:01:42.649 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated ridership: 11.2210%
+2026-01-21 09:01:42.649 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-21 09:01:42.666 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 69.1393%
+2026-01-21 09:01:42.666 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-21 09:01:42.696 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated transit-auto travel time ratio: 6.2489%
+2026-01-21 09:01:42.697 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-21 09:01:42.724 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated travel time: 2.0196%
+2026-01-21 09:01:42.724 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating productivity...
+2026-01-21 09:01:42.736 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated productivity: 79.2117%
+2026-01-21 09:01:42.736 [Thomas] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 103.491903ms
+2026-01-21 09:01:42.736 [Thomas] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3435
+2026-01-21 09:06:03.252 [${sys:log.signature}] [main] INFO  Analysis - Starting Analysis...
+2026-01-21 09:06:06.992 [${sys:log.signature}] [main] ERROR Analysis - Analysis pipeline failed with a fatal error: while scanning for the next token
+found character '\t(TAB)' that cannot start any token. (Do not use \t(TAB) for indentation)
+ in 'reader', line 3, column 1:
+    	[
+    ^
+
+org.yaml.snakeyaml.scanner.ScannerException: while scanning for the next token
+found character '\t(TAB)' that cannot start any token. (Do not use \t(TAB) for indentation)
+ in 'reader', line 3, column 1:
+    	[
+    ^
+
+	at org.yaml.snakeyaml.scanner.ScannerImpl.fetchMoreTokens(ScannerImpl.java:460)
+	at org.yaml.snakeyaml.scanner.ScannerImpl.peekToken(ScannerImpl.java:276)
+	at org.yaml.snakeyaml.parser.ParserImpl$ParseDocumentEnd.produce(ParserImpl.java:279)
+	at org.yaml.snakeyaml.parser.ParserImpl.peekEvent(ParserImpl.java:161)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector$1.peek(CommentEventsCollector.java:57)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector$1.peek(CommentEventsCollector.java:43)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector.collectEvents(CommentEventsCollector.java:136)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector.collectEvents(CommentEventsCollector.java:116)
+	at org.yaml.snakeyaml.composer.Composer.composeScalarNode(Composer.java:249)
+	at org.yaml.snakeyaml.composer.Composer.composeNode(Composer.java:214)
+	at org.yaml.snakeyaml.composer.Composer.getNode(Composer.java:141)
+	at org.yaml.snakeyaml.composer.Composer.getSingleNode(Composer.java:167)
+	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:179)
+	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:508)
+	at org.yaml.snakeyaml.Yaml.load(Yaml.java:449)
+	at com.thomas.pt.utils.Utility.loadYaml(Utility.kt:10)
+	at com.thomas.pt.core.RunMatsim.extractMetadata-3nIYWDw(RunMatsim.kt:53)
+	at com.thomas.pt.Analysis.run(Main.kt:146)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.parse(CoreCliktCommand.kt:107)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:78)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:90)
+	at com.thomas.pt.MainKt.main(Main.kt:199)
+2026-01-21 09:08:51.887 [Thomas] [main] INFO  Analysis - Starting Analysis...
+2026-01-21 09:08:54.763 [Thomas] [main] ERROR Analysis - Analysis pipeline failed with a fatal error: while scanning for the next token
+found character '\t(TAB)' that cannot start any token. (Do not use \t(TAB) for indentation)
+ in 'reader', line 3, column 1:
+    	[
+    ^
+
+org.yaml.snakeyaml.scanner.ScannerException: while scanning for the next token
+found character '\t(TAB)' that cannot start any token. (Do not use \t(TAB) for indentation)
+ in 'reader', line 3, column 1:
+    	[
+    ^
+
+	at org.yaml.snakeyaml.scanner.ScannerImpl.fetchMoreTokens(ScannerImpl.java:460)
+	at org.yaml.snakeyaml.scanner.ScannerImpl.peekToken(ScannerImpl.java:276)
+	at org.yaml.snakeyaml.parser.ParserImpl$ParseDocumentEnd.produce(ParserImpl.java:279)
+	at org.yaml.snakeyaml.parser.ParserImpl.peekEvent(ParserImpl.java:161)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector$1.peek(CommentEventsCollector.java:57)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector$1.peek(CommentEventsCollector.java:43)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector.collectEvents(CommentEventsCollector.java:136)
+	at org.yaml.snakeyaml.comments.CommentEventsCollector.collectEvents(CommentEventsCollector.java:116)
+	at org.yaml.snakeyaml.composer.Composer.composeScalarNode(Composer.java:249)
+	at org.yaml.snakeyaml.composer.Composer.composeNode(Composer.java:214)
+	at org.yaml.snakeyaml.composer.Composer.getNode(Composer.java:141)
+	at org.yaml.snakeyaml.composer.Composer.getSingleNode(Composer.java:167)
+	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:179)
+	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:508)
+	at org.yaml.snakeyaml.Yaml.load(Yaml.java:449)
+	at com.thomas.pt.utils.Utility.loadYaml(Utility.kt:10)
+	at com.thomas.pt.core.RunMatsim.extractMetadata-3nIYWDw(RunMatsim.kt:53)
+	at com.thomas.pt.Analysis.run(Main.kt:162)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.parse(CoreCliktCommand.kt:107)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:78)
+	at com.github.ajalt.clikt.core.CoreCliktCommandKt.main(CoreCliktCommand.kt:90)
+	at com.thomas.pt.MainKt.main(Main.kt:215)
+2026-01-21 09:17:38.296 [Thomas] [main] INFO  Analysis - Starting Analysis...
+2026-01-21 09:17:42.459 [Thomas] [main] INFO  Analysis - MATSim metadata loaded in 19.030402ms
+2026-01-21 09:17:42.607 [Thomas] [main] INFO  Analysis - Parsing events from file: sim/test/output/output_events.xml.gz
+2026-01-21 09:18:05.393 [Thomas] [main] INFO  Analysis - Event parsing completed in 22.785998079s
+2026-01-21 09:18:05.634 [Thomas] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-21 09:18:05.634 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-21 09:18:05.636 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-21 09:18:05.636 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-21 09:18:05.650 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated ridership: 11.2210%
+2026-01-21 09:18:05.651 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-21 09:18:05.669 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 69.1393%
+2026-01-21 09:18:05.670 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-21 09:18:05.696 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated transit-auto travel time ratio: 6.2489%
+2026-01-21 09:18:05.697 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-21 09:18:05.720 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated travel time: 2.0196%
+2026-01-21 09:18:05.720 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating productivity...
+2026-01-21 09:18:05.732 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated productivity: 79.2117%
+2026-01-21 09:18:05.732 [Thomas] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 98.022976ms
+2026-01-21 09:18:05.732 [Thomas] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3435

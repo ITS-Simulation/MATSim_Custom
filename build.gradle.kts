@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVer = "2.2.21"
+    val kotlinVer = "2.3.0"
     kotlin("jvm") version kotlinVer
     kotlin("plugin.serialization") version kotlinVer
     application
@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.thomas"
-version = "2.0.3"
+version = "2.5.0"
 
 repositories {
     maven("https://repo.osgeo.org/repository/release/")
@@ -33,6 +33,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.github.ajalt.clikt:clikt:5.0.3")
     implementation("org.duckdb:duckdb_jdbc:1.4.3.0")
+    implementation("org.kobjects.ktxml:core:1.0.0")
 }
 
 application {
