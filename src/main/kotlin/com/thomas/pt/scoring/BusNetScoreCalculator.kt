@@ -22,6 +22,7 @@ class BusNetScoreCalculator(
 
     private val busPassengerRecords: String
     private val busDelayRecords: String
+    private val busTripRecords: String
     private val tripRecords: String
 
     private val metadata by lazy { MATSimMetadataStore.metadata }
@@ -65,6 +66,24 @@ class BusNetScoreCalculator(
                 }
 
             }
+            busTripRecords = format.resolveExtension(
+                it["bus_trip_records"] as String
+            ).let { file ->
+                when (format) {
+                    WriterFormat.ARROW -> "read_arrow('$file')"
+                    WriterFormat.CSV -> """
+                        read_csv('$file', 
+                            header=true, 
+                            columns={
+                                bus_id: VARCHAR,
+                                link_id: VARCHAR,
+                                link_length: DOUBLE,
+                                have_passenger: BOOLEAN,
+                            }
+                        )
+                        """.trimIndent()
+                }
+            }
             tripRecords = format.resolveExtension(
                 it["trip_records"] as String
             ).let { file ->
@@ -93,6 +112,8 @@ class BusNetScoreCalculator(
                 transitAutoTimeRatio = it["transit_auto_time_ratio"] as Double,
                 onTimePerf = it["on_time_performance"] as Double,
                 productivity = it["productivity"] as Double,
+                busEfficiency = it["bus_efficiency"] as Double,
+                busEffectiveTravelDistance = it["bus_effective_travel_dist"] as Double,
             )
         }
     }
@@ -149,6 +170,30 @@ class BusNetScoreCalculator(
             """.trimIndent()
         )
     )
+    
+    private fun calculateBusEfficiency(): Double = exp(
+        -db.queryScalar(
+            """
+                SELECT 
+                    COALESCE(SUM(link_length), 0.0) / NULLIF((SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords), 0)
+                FROM $busTripRecords
+            """.trimIndent()
+        )
+    )
+
+    private fun calculateBusEffectiveTravelDist(): Double = db.queryScalar(
+        """
+            WITH bus_trip_data AS (
+                SELECT * FROM $busTripRecords
+            )
+            SELECT (
+                SUM(
+                    CASE WHEN have_passenger THEN link_length ELSE 0.0 END
+                ) / NULLIF(SUM(link_length), 0.0)
+            ) AS effective_travel_distance_ratio
+            FROM bus_trip_data
+        """.trimIndent()
+    )
 
     private fun computeScore(
         weight: Double,
@@ -180,13 +225,17 @@ class BusNetScoreCalculator(
             val travelTimeRatio = computeScore(scoringWeights.transitAutoTimeRatio, "transit-auto travel time ratio", ::calculateTravelTimeRatio)
             val travelTime = computeScore(scoringWeights.travelTime, "travel time", ::calculateTravelTime)
             val productivity = computeScore(scoringWeights.productivity, "productivity", ::calculateProductivity)
+            val busEfficiency = computeScore(scoringWeights.busEfficiency, "bus efficiency", ::calculateBusEfficiency)
+            val busEffectiveTravelDist = computeScore(scoringWeights.busEffectiveTravelDistance, "bus effective travel distance rate", ::calculateBusEffectiveTravelDist, false)
 
             scoringWeights.serviceCoverage * serviceCoverage +
                     scoringWeights.ridership * ridership +
                     scoringWeights.onTimePerf * onTimePerf +
                     scoringWeights.travelTime * travelTime +
                     scoringWeights.transitAutoTimeRatio * travelTimeRatio +
-                    scoringWeights.productivity * productivity
+                    scoringWeights.productivity * productivity +
+                    scoringWeights.busEfficiency * busEfficiency +
+                    scoringWeights.busEffectiveTravelDistance * busEffectiveTravelDist
         }
         logger.info("MATSim data processing & Score calculation completed in $time")
         logger.info("System-wide score: %.4f".format(score))

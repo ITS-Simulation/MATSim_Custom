@@ -7,9 +7,9 @@ import org.apache.arrow.vector.types.pojo.Schema
 import java.io.File
 
 class ArrowBusPassengerDataWriter(
-    outputPath: File,
+    outputFile: File,
     batchSize: Int
-): ArrowBatchWriter<BusPassengerData>(outputPath, batchSize) {
+): ArrowBatchWriter<BusPassengerData>(outputFile, batchSize) {
     override val schema: Schema = BusPassengerDataSchema.schema
 
     private lateinit var busId: VarCharVector

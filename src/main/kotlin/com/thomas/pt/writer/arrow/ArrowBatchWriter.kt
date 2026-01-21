@@ -10,7 +10,7 @@ import java.io.File
 import java.nio.channels.Channels
 
 abstract class ArrowBatchWriter<T>(
-    outputPath: File,
+    outputFile: File,
     private val batchSize: Int
 ): GenericWriter<T> {
     protected val allocator: BufferAllocator = RootAllocator()
@@ -20,7 +20,7 @@ abstract class ArrowBatchWriter<T>(
         VectorSchemaRoot.create(schema, allocator)
     }
 
-    private val outputStream = outputPath.outputStream()
+    private val outputStream = outputFile.outputStream()
     private val writer: ArrowStreamWriter by lazy {
         ArrowStreamWriter(root, null, Channels.newChannel(outputStream))
     }

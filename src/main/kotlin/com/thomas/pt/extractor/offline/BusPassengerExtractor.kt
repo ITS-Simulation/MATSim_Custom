@@ -39,7 +39,7 @@ class BusPassengerExtractor(
         if (vehicleId !in vehDriverMap) return
         if (personId == vehDriverMap[vehicleId]) return
         
-        assert(
+        require(
             writer.pushBusPassengerData(
                 BusPassengerData(
                     personId = personId,

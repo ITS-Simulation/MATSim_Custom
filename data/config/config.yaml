@@ -10,6 +10,7 @@ files:
     bus_pax_records: "data/temp/bus_pax_records"
     bus_delay_records: "data/temp/bus_delay_records"
     trip_records: "data/temp/trip_records"
+    bus_trip_records: "data/temp/bus_trip_records"
 
 batch_size: 50000
 
@@ -21,9 +22,12 @@ scoring:
     travel_time_baseline: 20.0 # minutes
 
   weights:
+    # Set the weights for each scoring metric (0.0 to disable the metric). The weights must sum to 1.0.
     service_coverage: 0.225
     ridership: 0.275
     travel_time: 0.05
     transit_auto_time_ratio: 0.1625
     on_time_performance: 0.1625
     productivity: 0.125
+    bus_efficiency: 0.0
+    bus_effective_travel_dist: 0.0

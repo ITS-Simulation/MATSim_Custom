@@ -15,7 +15,7 @@ import org.matsim.core.api.experimental.events.handler.VehicleDepartsAtFacilityE
 
 class BusDelayHandler(
     private val targetIter: Int,
-    private val eventWriter: MATSimEventWriter 
+    private val writer: MATSimEventWriter
 ) :
     VehicleArrivesAtFacilityEventHandler,
     VehicleDepartsAtFacilityEventHandler 
@@ -40,8 +40,8 @@ class BusDelayHandler(
         if (!startCollect.value) return
         if (event.vehicleId !in busMap) return
 
-        assert(
-            eventWriter.pushBusDelayData(
+        require(
+            writer.pushBusDelayData(
                 busMap[event.vehicleId]!!.copy(
                     depDelay = event.delay,
                 )

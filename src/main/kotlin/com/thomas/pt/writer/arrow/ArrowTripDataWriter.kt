@@ -9,9 +9,9 @@ import org.apache.arrow.vector.types.pojo.Schema
 import java.io.File
 
 class ArrowTripDataWriter(
-    outputPath: File,
+    outputFile: File,
     batchSize: Int
-): ArrowBatchWriter<TripData>(outputPath, batchSize) {
+): ArrowBatchWriter<TripData>(outputFile, batchSize) {
     override val schema: Schema = TripDataSchema.schema
 
     private lateinit var personId: VarCharVector

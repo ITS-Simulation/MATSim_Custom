@@ -1,6 +1,6 @@
 package com.thomas.pt.extractor.offline.model
 
-import com.thomas.pt.model.offline.ParsedEvent
+import com.thomas.pt.model.extractor.ParsedEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -11,7 +11,6 @@ import kotlinx.coroutines.coroutineScope
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 import java.io.File
-import java.io.FileReader
 import java.util.zip.GZIPInputStream
 
 class OfflineEventParser(private val file: File) {
@@ -49,7 +48,7 @@ class OfflineEventParser(private val file: File) {
         
         eventFlow().collect { event ->
             channels.forEach {
-                assert(it.trySend(event).isSuccess)
+                require(it.trySend(event).isSuccess)
             }
         }
         

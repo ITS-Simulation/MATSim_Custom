@@ -4,6 +4,7 @@ import com.thomas.pt.model.metadata.MATSimMetadata
 import com.thomas.pt.model.metadata.NetworkBoundaries
 import com.thomas.pt.utils.Utility
 import org.matsim.api.core.v01.Coord
+import org.matsim.api.core.v01.network.Network
 import org.matsim.api.core.v01.population.Activity
 import org.matsim.api.core.v01.population.Population
 import org.matsim.pt.transitSchedule.api.TransitSchedule
@@ -17,9 +18,18 @@ object MATSimMetadataStore {
         get() = _metadata.takeIf { ::_metadata.isInitialized }
             ?: throw IllegalStateException("Metadata not initialized. Call build() first.")
 
+    private fun getNetworkBoundary(net: Network): NetworkBoundaries
+            = net.nodes.values.let {
+        NetworkBoundaries(
+            minX = it.minOf { node -> node.coord.x },
+            minY = it.minOf { node -> node.coord.y },
+            maxX = it.maxOf { node -> node.coord.x },
+            maxY = it.maxOf { node -> node.coord.y },
+        )
+    }
 
     private fun extractCoverage(
-        netBound: NetworkBoundaries,
+        net: Network,
         radius: Double,
         plan: Population,
         schedule: TransitSchedule,
@@ -48,7 +58,7 @@ object MATSimMetadataStore {
                 }
             }.toSet()
 
-        val qt = netBound.genQuadTree<TransitStopFacility>()
+        val qt = getNetworkBoundary(net).genQuadTree<TransitStopFacility>()
         busStops.forEach { stop ->
             qt.put(stop.coord.x, stop.coord.y, stop)
         }
@@ -76,12 +86,12 @@ object MATSimMetadataStore {
 
     fun build(
         yamlConfig: Map<String, Any>,
-        netBound: NetworkBoundaries,
+        net: Network,
         plan: Population,
         schedule: TransitSchedule,
         transitVehicles: Vehicles
     ) {
-        assert(!::_metadata.isInitialized) { "Metadata is already initialized" }
+        require(!::_metadata.isInitialized) { "Metadata is already initialized" }
 
         // Extract headway tolerance and coverage radius
         val (radius, earlyHeadwayTolerance, lateHeadwayTolerance, travelTimeBaseline)
@@ -105,14 +115,13 @@ object MATSimMetadataStore {
             .partition { vehicle ->
                 busMarkers.any { mark -> "${vehicle.type.id}".contains(mark, true) }
             }
-        println(bus.map{it.id.toString()})
-        println(blacklist.map{it.id.toString()})
 
         _metadata = MATSimMetadata(
             totalPopulation = plan.persons.size,
-            serviceCoverage = extractCoverage(netBound, radius, plan, schedule, modeFilter),
+            serviceCoverage = extractCoverage(net, radius, plan, schedule, modeFilter),
             bus = bus.map { it.id }.toSet(),
             blacklist = blacklist.map { it.id }.toSet(),
+            linkLength = net.links.mapValues { (_, link) -> link.length / 1000.0 },
             earlyHeadwayTolerance = earlyHeadwayTolerance,
             lateHeadwayTolerance = lateHeadwayTolerance,
             travelTimeBaseline = travelTimeBaseline,

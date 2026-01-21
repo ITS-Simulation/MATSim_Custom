@@ -8,9 +8,9 @@ import org.apache.arrow.vector.types.pojo.Schema
 import java.io.File
 
 class ArrowBusDelayDataWriter(
-    outputPath: File,
+    outputFile: File,
     batchSize: Int
-): ArrowBatchWriter<BusDelayData>(outputPath, batchSize) {
+): ArrowBatchWriter<BusDelayData>(outputFile, batchSize) {
     override val schema: Schema = BusDelayDataSchema.schema
 
     private lateinit var stopId: VarCharVector

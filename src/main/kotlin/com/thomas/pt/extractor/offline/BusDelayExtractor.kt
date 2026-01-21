@@ -38,7 +38,7 @@ class BusDelayExtractor(
         val vehicleId = attrs["vehicle"] ?: return
         val existing = busMap.remove(vehicleId) ?: return
         
-        assert(
+        require(
             writer.pushBusDelayData(
                 existing.copy(
                     depDelay = attrs["delay"]?.toDoubleOrNull() ?: Double.NaN

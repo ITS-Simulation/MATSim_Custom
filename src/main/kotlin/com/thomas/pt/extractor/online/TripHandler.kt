@@ -18,7 +18,7 @@ import org.matsim.api.core.v01.population.Person
 
 class TripHandler(
     private val targetIter: Int,
-    private val eventWriter: MATSimEventWriter
+    private val writer: MATSimEventWriter
 ) :
     PersonDepartureEventHandler,
     PersonEntersVehicleEventHandler,
@@ -69,8 +69,8 @@ class TripHandler(
             }
         ) return
 
-        assert(
-            eventWriter.pushTripData(
+        require(
+            writer.pushTripData(
                 trip.copy(
                     travelTime = event.time - trip.startTime
                 )

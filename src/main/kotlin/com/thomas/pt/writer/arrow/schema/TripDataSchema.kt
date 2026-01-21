@@ -17,9 +17,9 @@ object TripDataSchema {
                 ArrowType.FloatingPoint(FloatingPointPrecision.DOUBLE)
             ), null),
             Field("main_mode", FieldType.notNullable(ArrowType.Utf8.INSTANCE), null),
-            Field("veh_list", FieldType.notNullable(ArrowType.List.INSTANCE), listOf(
-                Field("veh", FieldType.notNullable(ArrowType.Utf8.INSTANCE), null)
-            ))
+            Field("veh_list", FieldType.notNullable(ArrowType.List.INSTANCE),
+                listOf(Field("veh", FieldType.notNullable(ArrowType.Utf8.INSTANCE), null))
+            ),
         )
     )
 }

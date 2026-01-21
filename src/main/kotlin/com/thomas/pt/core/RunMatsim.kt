@@ -1,17 +1,17 @@
 package com.thomas.pt.core
 
 import com.thomas.pt.extractor.metadata.MATSimMetadataStore
-import com.thomas.pt.model.metadata.NetworkBoundaries
 import com.thomas.pt.writer.core.MATSimEventWriter
 import com.thomas.pt.extractor.online.BusDelayHandler
 import com.thomas.pt.extractor.online.BusPassengerHandler
+import com.thomas.pt.extractor.online.BusTripHandler
 import com.thomas.pt.extractor.online.TripHandler
+import com.thomas.pt.model.extractor.DataEndpoints
 import com.thomas.pt.utils.Utility
 import com.thomas.pt.writer.core.WriterFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.matsim.api.core.v01.network.Network
 import org.matsim.core.config.Config
 import org.matsim.core.config.ConfigUtils
 import org.matsim.core.config.groups.ControllerConfigGroup
@@ -23,22 +23,13 @@ import org.slf4j.LoggerFactory
 import java.io.OutputStream
 import java.io.PrintStream
 import java.nio.file.Path
+import kotlin.collections.get
 import kotlin.time.Duration
 import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
 
 object RunMatsim {
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    private fun getNetworkBoundary(net: Network): NetworkBoundaries
-        = net.nodes.values.let {
-            NetworkBoundaries(
-                minX = it.minOf { node -> node.coord.x },
-                minY = it.minOf { node -> node.coord.y },
-                maxX = it.maxOf { node -> node.coord.x },
-                maxY = it.maxOf { node -> node.coord.y },
-            )
-        }
 
     fun extractMetadata(
         yaml: Path,
@@ -59,7 +50,7 @@ object RunMatsim {
         measureTime {
             MATSimMetadataStore.build(
                 yamlConfig = yamlConfig,
-                netBound = getNetworkBoundary(controller.scenario.network),
+                net = controller.scenario.network,
                 plan = controller.scenario.population,
                 schedule = controller.scenario.transitSchedule,
                 transitVehicles = controller.scenario.transitVehicles,
@@ -132,31 +123,25 @@ object RunMatsim {
         MATSimEventWriter(
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
             batchSize = batchConfig,
-            busPaxData = dataOutConfig["bus_pax_records"] as String,
-            busDelayData = dataOutConfig["bus_delay_records"] as String,
-            tripData = dataOutConfig["trip_records"] as String,
+            files = DataEndpoints(
+                busPassengerDataFile = dataOutConfig["bus_pax_records"] as String,
+                busDelayDataFile = dataOutConfig["bus_delay_records"] as String,
+                tripDataFile = dataOutConfig["trip_records"] as String,
+                busTripDataFile = dataOutConfig["bus_trip_records"] as String,
+            ),
             format = format
-        ).use { eventWriter ->
-            val busPassengerHandler = BusPassengerHandler(
-                targetIter = lastIteration,
-                eventWriter = eventWriter,
-            )
-
-            val busDelayHandler = BusDelayHandler(
-                targetIter = lastIteration,
-                eventWriter = eventWriter,
-            )
-
-            val tripHandler = TripHandler(
-                targetIter = lastIteration,
-                eventWriter = eventWriter,
-            )
+        ).use { writer ->
+            val busPassengerHandler = BusPassengerHandler(lastIteration, writer)
+            val busDelayHandler = BusDelayHandler(lastIteration, writer)
+            val busTripHandler = BusTripHandler(lastIteration, writer)
+            val tripHandler = TripHandler(lastIteration, writer)
 
             controller.addOverridingModule(
                 object: AbstractModule() {
                     override fun install() {
                         this.addEventHandlerBinding().toInstance(busPassengerHandler)
                         this.addEventHandlerBinding().toInstance(busDelayHandler)
+                        this.addEventHandlerBinding().toInstance(busTripHandler)
                         this.addEventHandlerBinding().toInstance(tripHandler)
                     }
                 }

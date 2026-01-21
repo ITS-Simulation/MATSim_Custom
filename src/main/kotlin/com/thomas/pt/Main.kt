@@ -11,8 +11,10 @@ import com.thomas.pt.core.RunMatsim
 import com.thomas.pt.extractor.metadata.MATSimMetadataStore
 import com.thomas.pt.extractor.offline.BusDelayExtractor
 import com.thomas.pt.extractor.offline.BusPassengerExtractor
+import com.thomas.pt.extractor.offline.BusTripExtractor
 import com.thomas.pt.extractor.offline.TripExtractor
 import com.thomas.pt.extractor.offline.model.OfflineEventParser
+import com.thomas.pt.model.extractor.DataEndpoints
 import com.thomas.pt.scoring.BusNetScoreCalculator
 import com.thomas.pt.utils.Utility
 import com.thomas.pt.writer.core.MATSimEventWriter
@@ -24,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.LoggerContext
 import org.matsim.api.core.v01.Id
+import org.matsim.api.core.v01.network.Link
 import org.matsim.vehicles.Vehicle
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -165,19 +168,24 @@ class Analysis: CliktCommand(name = "analysis") {
 
             MATSimEventWriter(
                 scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-                busPaxData = dataPaths["bus_pax_records"] as String,
-                busDelayData = dataPaths["bus_delay_records"] as String,
-                tripData = dataPaths["trip_records"] as String,
+                files = DataEndpoints(
+                    busPassengerDataFile = dataPaths["bus_pax_records"] as String,
+                    busDelayDataFile = dataPaths["bus_delay_records"] as String,
+                    tripDataFile = dataPaths["trip_records"] as String,
+                    busTripDataFile = dataPaths["bus_trip_records"] as String,
+                ),
                 batchSize = batchConfig,
                 format = format,
             ).use { writer ->
                 val metadata = MATSimMetadataStore.metadata
                 val bus = metadata.bus.map(Id<Vehicle>::toString).toSet()
                 val blacklist = metadata.blacklist.map(Id<Vehicle>::toString).toSet()
+                val linkLengths = metadata.linkLength.mapKeys { it.key.toString() }
 
                 val busPassengerExtractor = BusPassengerExtractor(bus, writer)
                 val busDelayExtractor = BusDelayExtractor(bus, writer)
                 val tripExtractor = TripExtractor(blacklist, writer)
+                val busTripExtractor = BusTripExtractor(bus, linkLengths, writer)
 
                 val parser = OfflineEventParser(events)
 
@@ -187,6 +195,7 @@ class Analysis: CliktCommand(name = "analysis") {
                         parser.parseEventsAsync(
                             busPassengerExtractor,
                             busDelayExtractor,
+                            busTripExtractor,
                             tripExtractor
                         )
                     }

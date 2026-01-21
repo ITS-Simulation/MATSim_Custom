@@ -19,15 +19,15 @@ import kotlin.collections.mutableMapOf
 
 class BusPassengerHandler(
     private val targetIter: Int,
-    private val eventWriter: MATSimEventWriter
+    private val writer: MATSimEventWriter
 ) :
     TransitDriverStartsEventHandler,
     PersonEntersVehicleEventHandler,
     VehicleLeavesTrafficEventHandler
 {
     private val metadata by lazy { MATSimMetadataStore.metadata }
-    private var vehDriverBusMap =  mutableMapOf<Id<Vehicle>,Id<Person>>()
-    
+    private var vehDriverMap = mutableMapOf<Id<Vehicle>, Id<Person>>()
+
     private val _startCollect = MutableStateFlow(false)
     val startCollect = _startCollect.asStateFlow()
 
@@ -35,16 +35,16 @@ class BusPassengerHandler(
         if (!startCollect.value) return
         if (event.vehicleId !in metadata.bus) return
 
-        vehDriverBusMap[event.vehicleId] = event.driverId
+        vehDriverMap[event.vehicleId] = event.driverId
     }
 
     override fun handleEvent(event: PersonEntersVehicleEvent) {
         if (!startCollect.value) return
-        if (event.vehicleId !in vehDriverBusMap.keys) return
-        if (event.personId == vehDriverBusMap[event.vehicleId]) return
+        if (event.vehicleId !in vehDriverMap.keys) return
+        if (event.personId == vehDriverMap[event.vehicleId]) return
         
-        assert(
-            eventWriter.pushBusPassengerData(
+        require(
+            writer.pushBusPassengerData(
                 BusPassengerData(
                     personId = event.personId.toString(),
                     busId = event.vehicleId.toString(),
@@ -55,11 +55,11 @@ class BusPassengerHandler(
 
     override fun handleEvent(event: VehicleLeavesTrafficEvent) {
         if (!startCollect.value) return
-        vehDriverBusMap.remove(event.vehicleId)
+        vehDriverMap.remove(event.vehicleId)
     }
 
     override fun reset(iteration: Int) {
         _startCollect.update { iteration == targetIter }
-        vehDriverBusMap.clear()
+        vehDriverMap.clear()
     }
 }

@@ -69,7 +69,7 @@ class TripExtractor(
             }
         ) return
         
-        assert(
+        require(
             writer.pushTripData(
             trip.copy(
                     travelTime = time - trip.startTime
