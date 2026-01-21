@@ -41,13 +41,15 @@ The pipeline is controlled by a YAML config file.
 *   **scoring -> weights**: Adjust the relative importance of different service metrics.
 
 ## Scoring Logic
-The final network-wide score is a weighted sum of five key components:
+The final network-wide score is a weighted sum of seven key components:
 
 1.  **Service Coverage**: Based on spatial availability of transit.
 2.  **Ridership**: Percentage of the total population that used transit.
 3.  **On-Time Performance**: Percentage of bus arrivals within the early/late headway tolerance thresholds defined in the metadata.
 4.  **Travel Time Score**: Performance of bus travel times against a pre-defined baseline.
 5.  **Transit-Auto Time Ratio**: A comparison of average car travel times vs. bus travel times, favoring scenarios where transit is competitive.
+6.  **Bus Efficiency**: Measures the cost-effectiveness of the network (Cost per Passenger), calculated as Total Unique Passengers / Total Bus Distance (inverted for normalization).
+7.  **Bus Effective Travel Distance**: Ratio of total distance vs total distance with passengers (inverted for normalization).
 
 ## Logging
 The application uses Log4j2. You can override log levels at runtime:

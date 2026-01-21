@@ -41,13 +41,15 @@ Pipeline được điều khiển bởi một file cấu hình YAML.
 *   **scoring -> weights**: Điều chỉnh tầm quan trọng tương đối của các chỉ số dịch vụ khác nhau.
 
 ## Logic Tính Điểm
-Điểm tổng hợp toàn hệ thống là tổng có trọng số của năm thành phần chính:
+Điểm tổng hợp toàn hệ thống là tổng có trọng số của bảy thành phần chính:
 
 1.  **Service Coverage (Độ phủ dịch vụ)**: Dựa trên khả năng tiếp cận không gian của phương tiện công cộng.
 2.  **Ridership (Lượng hành khách)**: Tỷ lệ phần trăm tổng dân số sử dụng phương tiện công cộng.
 3.  **On-Time Performance (Hiệu suất đúng giờ)**: Tỷ lệ phần trăm xe buýt đến trong ngưỡng dung sai (sớm/muộn) được định nghĩa trong metadata.
 4.  **Travel Time Score (Điểm thời gian di chuyển)**: Hiệu suất thời gian di chuyển của xe buýt so với mốc cơ sở đã định trước.
 5.  **Transit-Auto Time Ratio (Tỷ lệ thời gian Xe buýt - Ô tô)**: So sánh thời gian di chuyển trung bình của ô tô và xe buýt, ưu tiên các kịch bản mà phương tiện công cộng có tính cạnh tranh.
+6.  **Bus Efficiency (Hiệu quả xe buýt)**: Đo lường tính hiệu quả chi phí của mạng lưới (Chi phí trên mỗi Hành khách), được tính bằng Tổng số hành khách duy nhất / Tổng quãng đường xe buýt (đảo ngược để chuẩn hóa).
+7.  **Bus Effective Travel Distance (Quãng đường di chuyển hiệu quả)**: Tỷ lệ tổng quãng đường di chuyển so với tổng quãng đường di chuyển có hành khách (đảo ngược để chuẩn hóa).
 
 ## Logging
 Ứng dụng sử dụng Log4j2. Bạn có thể ghi đè mức log khi chạy:
