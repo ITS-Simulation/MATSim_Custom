@@ -5,51 +5,69 @@ A Kotlin-based post-processing and scoring pipeline for MATSim bus simulation da
 
 ## Usage
 
-### Download
-You can download the latest pre-built JAR and the default `config.yaml` from the [GitHub Releases](https://github.com/ITS-Simulation/MATSim_Custom/releases) page.
+The application supports two execution modes:
+1.  **Simulation (`sim`)**: Runs the MATSim simulation and processes events **online** (in real-time) using event handlers. This avoids generating large XML event files.
+2.  **Analysis (`analysis`)**: Processes existing MATSim XML event files **offline** using a high-performance streaming parser. Useful for re-analyzing past runs.
 
-### Build
-Alternatively, build the shadow jar (fat jar):
-```bash
-./gradlew shadowJar
-```
+### 1. Simulation Mode (`sim`)
+Run the MATSim simulation and calculate scores immediately:
 
-Run the application:
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.0.0.jar \
+  -jar build/libs/dist-2.0.0.jar sim \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
-  --out data/out/final_scores.bin
+  --out data/out/final_scores.bin \
+  --format ARROW
 ```
 
-*__Note:__ Replace `2.0.0` with the actual version you are using. The `--add-opens` flag is mandatory for Apache Arrow to work on JDK 17+.*
-
-### Command Line Arguments
+#### Arguments
 *   `--cfg`: Path to application YAML configuration (**Required**).
 *   `--matsim-cfg`: Path to MATSim XML configuration (**Required**).
 *   `--out`: Path to output binary file (**Required**).
+*   `--format`: Output data format (case-insensitive). Options:
+    *   `ARROW` (Default): High-performance binary format, best for large datasets and continuous simulation.
+    *   `CSV`: Human-readable text format, easier for debugging, cross-referencing and simple analysis.
 *   `--log-file`: Path to custom log file (Default: `logs/app.log`).
-*   `--matsim-log`: Enable detailed MATSim console logging (Default: `false`).
+*   `--matsim-log`/`--no-matsim-log`: Toggle MATSim console logging (Default: Disabled).
 *   `--signature`: Custom worker signature for logs (Default: Hostname).
+
+### 2. Analysis Mode (`analysis`)
+Process an existing `output_events.xml.gz` file:
+
+```bash
+java --add-opens=java.base/java.nio=ALL-UNNAMED \
+  -jar build/libs/dist-2.0.0.jar analysis \
+  --cfg data/config/config.yaml \
+  --matsim-cfg data/config/matsim_config.xml \
+  --events data/out/output_events.xml.gz \
+  --out data/out/final_scores.bin
+```
+
+#### Arguments
+*   `--events`: Path to the MATSim events XML file (**Required**).
+*   `--cfg`, `--matsim-cfg`, `--out`, `--format`, `--log-file`: Same as `sim` mode.
+
+*__Note:__ The `--add-opens` flag is mandatory for Apache Arrow to work on JDK 17+.*
 
 ## Configuration
 The pipeline is controlled by a YAML config file. 
 
 ### Key Sections
-*   **files -> data**: Defines input/output paths for the generated Arrow records.
+*   **files -> data**: Defines input/output paths. Auto-resolves extensions based on `--format` (e.g., adds `.arrow` or `.csv`).
 *   **scoring -> weights**: Adjust the relative importance of different service metrics.
 
 ## Scoring Logic
-The final network-wide score is a weighted sum of seven key components:
+The final network-wide score is a weighted sum of **eight** key components:
 
 1.  **Service Coverage**: Based on spatial availability of transit.
 2.  **Ridership**: Percentage of the total population that used transit.
 3.  **On-Time Performance**: Percentage of bus arrivals within the early/late headway tolerance thresholds defined in the metadata.
 4.  **Travel Time Score**: Performance of bus travel times against a pre-defined baseline.
 5.  **Transit-Auto Time Ratio**: A comparison of average car travel times vs. bus travel times, favoring scenarios where transit is competitive.
-6.  **Bus Efficiency**: Measures the cost-effectiveness of the network (Cost per Passenger), calculated as Total Unique Passengers / Total Bus Distance (inverted for normalization).
-7.  **Bus Effective Travel Distance**: Ratio of total distance vs total distance with passengers (inverted for normalization).
+6.  **Productivity**: Measure of resource utilization, calculated as `Total Service Hours / Total Unique Passengers`.
+7.  **Bus Efficiency**: Measures the cost-effectiveness of the network (Cost per Passenger), calculated as `Total Bus Distance / Total Unique Passengers` (inverted for normalization).
+8.  **Bus Effective Travel Distance**: Ratio of `Total Distance with Passengers / Total Distance` (inverted for normalization).
 
 ## Logging
 The application uses Log4j2. You can override log levels at runtime:
