@@ -25,8 +25,8 @@ class OfflineEventParser(private val file: File) {
             while (parser.eventType != EventType.END_DOCUMENT) {
                 if (parser.eventType == EventType.START_TAG && parser.name == "event") {
                     val attrs = extractAttributes(parser)
-                    val time = attrs["time"]?.toDoubleOrNull() ?: 0.0
-                    val type = attrs["type"] ?: ""
+                    val time = attrs["time"]?.toDoubleOrNull() ?: return@flow
+                    val type = attrs["type"] ?: return@flow
 
                     emit(ParsedEvent(time, type, attrs))
                 }

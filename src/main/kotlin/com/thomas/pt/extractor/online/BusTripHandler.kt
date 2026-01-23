@@ -46,6 +46,7 @@ class BusTripHandler(
         val busId: Id<Vehicle>,
         val currentLinkId: Id<Link>,
         val passengers: Int,
+        val enterTime: Double,
         val pendingPassengers: Int
     )
 
@@ -67,7 +68,8 @@ class BusTripHandler(
             busId = event.vehicleId,
             currentLinkId = event.linkId,
             passengers = 0,
-            pendingPassengers = 0
+            pendingPassengers = 0,
+            enterTime = event.time
         )
     }
 
@@ -77,7 +79,8 @@ class BusTripHandler(
 
         busTrips[event.vehicleId] = trip.copy(
             currentLinkId = event.linkId,
-            passengers = trip.pendingPassengers
+            passengers = trip.pendingPassengers,
+            enterTime = event.time
         )
     }
 
@@ -112,6 +115,7 @@ class BusTripHandler(
                     linkId = trip.currentLinkId.toString(),
                     linkLen = metadata.linkLength[trip.currentLinkId] ?: return,
                     havePassenger = trip.passengers > 0,
+                    travelTime = event.time - trip.enterTime
                 )
             )
         )
@@ -131,6 +135,7 @@ class BusTripHandler(
                     linkId = trip.currentLinkId.toString(),
                     linkLen = metadata.linkLength[trip.currentLinkId] ?: return,
                     havePassenger = trip.passengers > 0,
+                    travelTime = event.time - trip.enterTime
                 )
             )
         )

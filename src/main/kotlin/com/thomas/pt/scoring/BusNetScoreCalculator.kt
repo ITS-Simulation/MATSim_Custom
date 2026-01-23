@@ -78,6 +78,7 @@ class BusNetScoreCalculator(
                                 bus_id: VARCHAR,
                                 link_id: VARCHAR,
                                 link_length: DOUBLE,
+                                travel_time: DOUBLE,
                                 have_passenger: BOOLEAN,
                             }
                         )
@@ -164,9 +165,19 @@ class BusNetScoreCalculator(
     private fun calculateProductivity(): Double = exp(
         -db.queryScalar(
             """
-                SELECT 
-                    COALESCE(${metadata.totalServiceHours} / NULLIF(COUNT(DISTINCT person_id), 0), 1e9)
-                FROM $busPassengerRecords
+                WITH total_service_hours AS (
+                    SELECT 
+                        COALESCE(SUM(travel_time) / 3600.0, 0.0) AS service_hours
+                    FROM $busTripRecords
+                ),
+                total_passenger AS (
+                    SELECT 
+                        COUNT(DISTINCT person_id) AS passenger_count
+                    FROM $busPassengerRecords
+                )
+                SELECT
+                    (SELECT service_hours FROM total_service_hours) /
+                    NULLIF((SELECT passenger_count FROM total_passenger), 0) AS productivity_ratio
             """.trimIndent()
         )
     )

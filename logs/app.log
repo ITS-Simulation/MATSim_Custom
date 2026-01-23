@@ -707,3 +707,26 @@ Caused by: java.io.FileNotFoundException: /home/thomas/VTS/Kotlin (Java)/MATSim_
 2026-01-21 17:09:10.616 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated productivity: 0.8525
 2026-01-21 17:09:10.617 [Thomas] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 110.687753ms
 2026-01-21 17:09:10.617 [Thomas] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3122
+2026-01-23 21:40:47.185 [Thomas] [main] INFO  Simulation - Log file redirected to: logs\app.log
+2026-01-23 21:40:47.188 [Thomas] [main] INFO  Simulation - Log signature: Thomas
+2026-01-23 21:40:47.249 [Thomas] [main] INFO  RunMatsim - Running MATSim core module
+2026-01-23 21:41:23.605 [Thomas] [main] INFO  RunMatsim - MATSim scenario loaded in 36.351754100s
+2026-01-23 21:41:23.655 [Thomas] [main] INFO  RunMatsim - MATSim metadata loaded in 49.275900ms
+2026-01-23 21:44:32.367 [Thomas] [main] INFO  RunMatsim - MATSim run completed in 3m 8.240069500s
+2026-01-23 21:44:32.370 [Thomas] [main] INFO  RunMatsim - Total execution time: 3m 44.641099500s
+2026-01-23 21:44:32.599 [Thomas] [main] INFO  Simulation - Run time: 3m 45.409702400s
+2026-01-23 21:44:33.451 [Thomas] [main] INFO  BusNetScoreCalculator - Processing MATSim event data...
+2026-01-23 21:44:33.452 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating service coverage...
+2026-01-23 21:44:33.452 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated service coverage: 40.0536%
+2026-01-23 21:44:33.453 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating ridership...
+2026-01-23 21:44:33.494 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated ridership: 13.8845%
+2026-01-23 21:44:33.495 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating on-time performance...
+2026-01-23 21:44:33.527 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated on-time performance: 82.6916%
+2026-01-23 21:44:33.528 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating transit-auto travel time ratio...
+2026-01-23 21:44:33.624 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated transit-auto travel time ratio: 0.0086
+2026-01-23 21:44:33.625 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating travel time...
+2026-01-23 21:44:33.726 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated travel time: 0.1662
+2026-01-23 21:44:33.726 [Thomas] [main] INFO  BusNetScoreCalculator - Calculating productivity...
+2026-01-23 21:44:33.859 [Thomas] [main] INFO  BusNetScoreCalculator - Calculated productivity: 0.8877
+2026-01-23 21:44:33.861 [Thomas] [main] INFO  BusNetScoreCalculator - MATSim data processing & Score calculation completed in 409.468ms
+2026-01-23 21:44:33.861 [Thomas] [main] INFO  BusNetScoreCalculator - System-wide score: 0.3833

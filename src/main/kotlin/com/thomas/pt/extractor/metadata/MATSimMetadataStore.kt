@@ -70,20 +70,6 @@ object MATSimMetadataStore {
         return popCoveredWithBus / totalPop
     }
 
-    private fun calculateServiceHours(schedule: TransitSchedule): Double {
-        return schedule.transitLines.values
-            .flatMap { it.routes.values }
-            .sumOf { route ->
-                val arrival = route.stops.last().arrivalOffset
-                val departure = route.stops.first().departureOffset
-                if (arrival.isDefined && departure.isDefined) {
-                    (arrival.seconds() - departure.seconds()) * route.departures.size
-                } else {
-                    0.0
-                }
-            } / 3600.0
-    }
-
     fun build(
         yamlConfig: Map<String, Any>,
         net: Network,
@@ -125,7 +111,6 @@ object MATSimMetadataStore {
             earlyHeadwayTolerance = earlyHeadwayTolerance,
             lateHeadwayTolerance = lateHeadwayTolerance,
             travelTimeBaseline = travelTimeBaseline,
-            totalServiceHours = calculateServiceHours(schedule)
         )
     }
 }

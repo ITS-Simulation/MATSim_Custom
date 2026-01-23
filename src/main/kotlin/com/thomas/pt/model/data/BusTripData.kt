@@ -11,6 +11,8 @@ data class BusTripData(
     val linkId: String,
     @ColumnName("link_length")
     val linkLen: Double,
+    @ColumnName("travel_time")
+    val travelTime: Double,
     @ColumnName("have_passenger")
     val havePassenger: Boolean
 )

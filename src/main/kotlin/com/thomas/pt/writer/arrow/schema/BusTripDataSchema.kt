@@ -14,6 +14,9 @@ object BusTripDataSchema {
             Field("link_length", FieldType.notNullable(
                 ArrowType.FloatingPoint(FloatingPointPrecision.DOUBLE)
             ), null),
+            Field("travel_time", FieldType.notNullable(
+                ArrowType.FloatingPoint(FloatingPointPrecision.DOUBLE)
+            ), null),
             Field("have_passenger", FieldType.notNullable(ArrowType.Bool.INSTANCE), null),
         )
     )

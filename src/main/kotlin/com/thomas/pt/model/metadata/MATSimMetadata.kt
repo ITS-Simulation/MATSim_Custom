@@ -13,5 +13,4 @@ data class MATSimMetadata(
     val earlyHeadwayTolerance: Double,
     val lateHeadwayTolerance: Double,
     val travelTimeBaseline: Double,
-    val totalServiceHours: Double,
 )

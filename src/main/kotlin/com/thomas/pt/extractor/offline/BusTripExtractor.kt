@@ -24,6 +24,7 @@ class BusTripExtractor(
         val busId: String,
         val currentLinkId: String,
         val passengers: Int,
+        val enterTime: Double,
         val pendingPassengers: Int
     )
 
@@ -33,12 +34,12 @@ class BusTripExtractor(
     override fun handleEvent(time: Double, type: String, attributes: Map<String, String>) {
         when (type) {
             TRANSIT_DRIVER_STARTS -> handleDriverStarts(attributes)
-            VEHICLE_ENTERS_TRAFFIC -> handleVehicleEnters(attributes)
-            LINK_ENTER -> handleLinkEnter(attributes)
+            VEHICLE_ENTERS_TRAFFIC -> handleVehicleEnters(time, attributes)
+            LINK_ENTER -> handleLinkEnter(time, attributes)
             PERSON_ENTER_VEHICLE -> handlePersonEnters(attributes)
             PERSON_LEAVE_VEHICLE -> handlePersonLeaves(attributes)
-            LINK_LEAVE -> handleLinkLeave(attributes)
-            VEHICLE_LEAVES_TRAFFIC -> handleVehicleLeaves(attributes)
+            LINK_LEAVE -> handleLinkLeave(time, attributes)
+            VEHICLE_LEAVES_TRAFFIC -> handleVehicleLeaves(time, attributes)
         }
     }
 
@@ -49,25 +50,27 @@ class BusTripExtractor(
         vehDriverMap[vehicleId] = attrs["driverId"] ?: return
     }
 
-    private fun handleVehicleEnters(attrs: Map<String, String>) {
+    private fun handleVehicleEnters(time: Double, attrs: Map<String, String>) {
         val vehicleId = attrs["vehicle"] ?: return
         if (vehicleId !in bus) return
 
         busTrips[vehicleId] = BusState(
             busId = vehicleId,
-            currentLinkId = attrs["link"] ?: "",
+            currentLinkId = attrs["link"] ?: return,
             passengers = 0,
-            pendingPassengers = 0
+            pendingPassengers = 0,
+            enterTime = time
         )
     }
 
-    private fun handleLinkEnter(attrs: Map<String, String>) {
+    private fun handleLinkEnter(time: Double, attrs: Map<String, String>) {
         val vehicleId = attrs["vehicle"] ?: return
         val trip = busTrips[vehicleId] ?: return
 
         busTrips[vehicleId] = trip.copy(
             currentLinkId = attrs["link"] ?: return,
-            passengers = trip.pendingPassengers
+            passengers = trip.pendingPassengers,
+            enterTime = time
         )
     }
 
@@ -97,7 +100,7 @@ class BusTripExtractor(
         )
     }
 
-    private fun handleLinkLeave(attrs: Map<String, String>) {
+    private fun handleLinkLeave(time: Double, attrs: Map<String, String>) {
         val vehicleId = attrs["vehicle"] ?: return
         val trip = busTrips[vehicleId] ?: return
 
@@ -108,12 +111,13 @@ class BusTripExtractor(
                     linkId = trip.currentLinkId,
                     linkLen = linkLength[trip.currentLinkId] ?: return,
                     havePassenger = trip.passengers > 0,
+                    travelTime = time - trip.enterTime
                 )
             )
         )
     }
 
-    private fun handleVehicleLeaves(attrs: Map<String, String>) {
+    private fun handleVehicleLeaves(time: Double, attrs: Map<String, String>) {
         val vehicleId = attrs["vehicle"] ?: return
         val trip = busTrips.remove(vehicleId) ?: return
         require(trip.pendingPassengers == 0) {
@@ -127,6 +131,7 @@ class BusTripExtractor(
                     linkId = trip.currentLinkId,
                     linkLen = linkLength[trip.currentLinkId] ?: return,
                     havePassenger = trip.passengers > 0,
+                    travelTime = time - trip.enterTime
                 )
             )
         )
