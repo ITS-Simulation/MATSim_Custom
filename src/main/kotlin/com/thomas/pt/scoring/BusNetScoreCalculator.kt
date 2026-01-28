@@ -186,7 +186,7 @@ class BusNetScoreCalculator(
         -db.queryScalar(
             """
                 SELECT 
-                    COALESCE(SUM(link_length), 0.0) / NULLIF((SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords), 0)
+                    COALESCE(SUM(link_length), 1e9) / NULLIF((SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords), 0)
                 FROM $busTripRecords
             """.trimIndent()
         )
@@ -203,6 +203,7 @@ class BusNetScoreCalculator(
                 ) / NULLIF(SUM(link_length), 0.0)
             ) AS effective_travel_distance_ratio
             FROM bus_trip_data
+            WHERE NOT isnan(link_length) AND NOT isinf(link_length)
         """.trimIndent()
     )
 
