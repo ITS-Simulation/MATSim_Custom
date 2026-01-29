@@ -14,7 +14,7 @@ Run the MATSim simulation and calculate scores immediately:
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.0.0.jar sim \
+  -jar build/libs/dist-2.8.0.jar sim \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
   --out data/out/final_scores.bin \
@@ -32,12 +32,24 @@ java --add-opens=java.base/java.nio=ALL-UNNAMED \
 *   `--matsim-log`/`--no-matsim-log`: Toggle MATSim console logging (Default: Disabled).
 *   `--signature`: Custom worker signature for logs (Default: Hostname).
 
-### 2. Analysis Mode (`analysis`)
+### 2. Simple Simulation (`simple-run`)
+Runs the MATSim simulation **without** the post-processing scoring pipeline. Useful for validating MATSim configs or generating raw data.
+
+```bash
+java --add-opens=java.base/java.nio=ALL-UNNAMED \
+  -jar build/libs/dist-2.8.0.jar simple-run \
+  --matsim-cfg data/config/matsim_config.xml
+```
+
+#### Arguments
+*   `--matsim-cfg`: Path to MATSim XML configuration (**Required**).
+
+### 3. Analysis Mode (`analysis`)
 Process an existing `output_events.xml.gz` file:
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.0.0.jar analysis \
+  -jar build/libs/dist-2.8.0.jar analysis \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
   --events data/out/output_events.xml.gz \
@@ -54,11 +66,12 @@ java --add-opens=java.base/java.nio=ALL-UNNAMED \
 The pipeline is controlled by a YAML config file. 
 
 ### Key Sections
+*   **batch_size**: Number of events to buffer before writing to disk (Performance tuning).
 *   **files -> data**: Defines input/output paths. Auto-resolves extensions based on `--format` (e.g., adds `.arrow` or `.csv`).
 *   **scoring -> weights**: Adjust the relative importance of different service metrics.
 
 ## Scoring Logic
-The final network-wide score is a weighted sum of **eight** key components:
+The final network-wide score is a weighted sum of **ten** key components:
 
 1.  **Service Coverage**: Based on spatial availability of transit.
 2.  **Ridership**: Percentage of the total population that used transit.
@@ -68,6 +81,8 @@ The final network-wide score is a weighted sum of **eight** key components:
 6.  **Productivity**: Measure of resource utilization, calculated as `Total Service Hours / Total Unique Passengers`.
 7.  **Bus Efficiency**: Measures the cost-effectiveness of the network (Cost per Passenger), calculated as `Total Bus Distance / Total Unique Passengers` (inverted for normalization).
 8.  **Bus Effective Travel Distance**: Ratio of `Total Distance with Passengers / Total Distance` (inverted for normalization).
+9.  **Transit Route Ratio**: A pre-calculated ratio representing the spatial coverage or efficiency of the transit routes relative to the network.
+10. **Bus Transfer Rate**: Average number of bus-to-bus transfers per public transport trip, calculated as `Total Bus Transfers / Total PT Trips`.
 
 ## Logging
 The application uses Log4j2. You can override log levels at runtime:
@@ -101,6 +116,6 @@ RUN apt-get update && apt-get install -y wget unzip \
     && wget https://github.com/duckdb/duckdb/releases/download/v1.1.2/duckdb_cli-linux-amd64.zip \
     && unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin
 RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
-COPY build/libs/dist-2.0.0.jar app.jar
+COPY build/libs/dist-2.8.0.jar app.jar
 ENTRYPOINT ["java", "--add-opens=java.base/java.nio=ALL-UNNAMED", "-jar", "app.jar"]
 ```

@@ -53,3 +53,4 @@ dist*.zip
 
 QTesst/data_cottbus/
 QTesst/pt-tutorial/
+logs/
