@@ -4,6 +4,8 @@ import com.thomas.pt.db.DuckDBManager
 import com.thomas.pt.extractor.metadata.MATSimMetadataStore
 import com.thomas.pt.utils.Utility
 import com.thomas.pt.writer.core.WriterFormat
+import org.jetbrains.kotlinx.dataframe.api.add
+import org.jetbrains.kotlinx.dataframe.api.sum
 import org.slf4j.LoggerFactory
 import java.io.DataOutputStream
 import java.io.File
@@ -30,14 +32,14 @@ class BusNetScoreCalculator(
     private val scoringWeights: ScoringWeights
 
     init {
-        val yamlConfig = Utility.loadYaml(configPath)
-        Utility.getYamlSubconfig(yamlConfig, "files", "data").let {
-            busPassengerRecords = format.resolveExtension(
-                it["bus_pax_records"] as String
-            ).let { file ->
-                when (format) {
-                    WriterFormat.ARROW -> "read_arrow('$file')"
-                    WriterFormat.CSV -> """
+        Utility.loadYaml(configPath).let { cfg ->
+            Utility.getYamlSubconfig(cfg, "files", "data").let {
+                busPassengerRecords = format.resolveExtension(
+                    it["bus_pax_records"] as String
+                ).let { file ->
+                    when (format) {
+                        WriterFormat.ARROW -> "read_arrow('$file')"
+                        WriterFormat.CSV -> """
                         read_csv('$file', 
                             header=true, 
                             columns={
@@ -46,14 +48,14 @@ class BusNetScoreCalculator(
                             }
                         )
                         """.trimIndent()
+                    }
                 }
-            }
-            busDelayRecords = format.resolveExtension(
-                it["bus_delay_records"] as String
-            ).let { file ->
-                when (format) {
-                    WriterFormat.ARROW -> "read_arrow('$file')"
-                    WriterFormat.CSV -> """
+                busDelayRecords = format.resolveExtension(
+                    it["bus_delay_records"] as String
+                ).let { file ->
+                    when (format) {
+                        WriterFormat.ARROW -> "read_arrow('$file')"
+                        WriterFormat.CSV -> """
                         read_csv('$file', 
                             header=true, 
                             columns={
@@ -63,15 +65,15 @@ class BusNetScoreCalculator(
                             }
                         )
                         """.trimIndent()
-                }
+                    }
 
-            }
-            busTripRecords = format.resolveExtension(
-                it["bus_trip_records"] as String
-            ).let { file ->
-                when (format) {
-                    WriterFormat.ARROW -> "read_arrow('$file')"
-                    WriterFormat.CSV -> """
+                }
+                busTripRecords = format.resolveExtension(
+                    it["bus_trip_records"] as String
+                ).let { file ->
+                    when (format) {
+                        WriterFormat.ARROW -> "read_arrow('$file')"
+                        WriterFormat.CSV -> """
                         read_csv('$file', 
                             header=true, 
                             columns={
@@ -83,14 +85,14 @@ class BusNetScoreCalculator(
                             }
                         )
                         """.trimIndent()
+                    }
                 }
-            }
-            tripRecords = format.resolveExtension(
-                it["trip_records"] as String
-            ).let { file ->
-                when (format) {
-                    WriterFormat.ARROW -> "read_arrow('$file')"
-                    WriterFormat.CSV -> """
+                tripRecords = format.resolveExtension(
+                    it["trip_records"] as String
+                ).let { file ->
+                    when (format) {
+                        WriterFormat.ARROW -> "read_arrow('$file')"
+                        WriterFormat.CSV -> """
                         read_csv('$file', 
                             header=true, 
                             columns={
@@ -102,21 +104,14 @@ class BusNetScoreCalculator(
                             }
                         )
                         """.trimIndent()
+                    }
                 }
             }
-        }
-        Utility.getYamlSubconfig(yamlConfig, "scoring", "weights").let {
-            scoringWeights = ScoringWeights(
-                serviceCoverage = it["service_coverage"] as Double,
-                ridership = it["ridership"] as Double,
-                travelTime = it["travel_time"] as Double,
-                transitAutoTimeRatio = it["transit_auto_time_ratio"] as Double,
-                onTimePerf = it["on_time_performance"] as Double,
-                productivity = it["productivity"] as Double,
-                busEfficiency = it["bus_efficiency"] as Double,
-                busEffectiveTravelDistance = it["bus_effective_travel_dist"] as Double,
+            scoringWeights = ScoringWeights.fromYaml(
+                Utility.getYamlSubconfig(cfg, "scoring", "weights")
             )
         }
+
     }
 
     override fun close() = db.close()
@@ -124,6 +119,32 @@ class BusNetScoreCalculator(
     private fun calculateRidership(): Double = db.queryScalar(
         "SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords"
     ) / metadata.totalPopulation
+
+    private fun calculateTransfersRate(): Double {
+        val busList = metadata.bus.map { it.toString() }.toSet()
+        val tripsRecords = db.query(
+            "SELECT veh_list FROM $tripRecords WHERE main_mode = 'pt'"
+        )
+        tripsRecords.add("transfer") {
+            val vehList = "veh_list"<List<String>>()
+            vehList.zipWithNext().count { (prev, next) ->
+                (prev in busList) && (next in busList)
+            }
+        }.sum("transfer").toDouble().let { totalTransfers ->
+            val totalTrips = tripsRecords.rowsCount()
+            return if (totalTrips > 0) totalTransfers * 1.0 / totalTrips else Double.NaN
+        }
+    }
+
+    @Suppress("unused")
+    private fun calculateBusRevenueHours(): Double = db.queryScalar(
+        """
+            SELECT 
+                COALESCE(SUM(travel_time) / 3600.0, 0.0) AS service_hours
+            FROM $busTripRecords
+            WHERE have_passenger
+        """.trimIndent()
+    )
 
     private fun calculateOnTimePerf(): Double = db.queryScalar(
         """
@@ -232,6 +253,10 @@ class BusNetScoreCalculator(
             val serviceCoverage = metadata.serviceCoverage
             logger.info("Calculated service coverage: {}%", "%.4f".format(serviceCoverage * 100))
 
+            logger.info("Calculating transit route ratio...")
+            val transitRouteRatio = metadata.transitRouteRatios
+            logger.info("Calculated transit route ratio: {}%", "%.4f".format(transitRouteRatio * 100))
+
             val ridership = computeScore(scoringWeights.ridership, "ridership", ::calculateRidership, false)
             val onTimePerf = computeScore(scoringWeights.onTimePerf, "on-time performance", ::calculateOnTimePerf, false)
             val travelTimeRatio = computeScore(scoringWeights.transitAutoTimeRatio, "transit-auto travel time ratio", ::calculateTravelTimeRatio)
@@ -239,15 +264,18 @@ class BusNetScoreCalculator(
             val productivity = computeScore(scoringWeights.productivity, "productivity", ::calculateProductivity)
             val busEfficiency = computeScore(scoringWeights.busEfficiency, "bus efficiency", ::calculateBusEfficiency)
             val busEffectiveTravelDist = computeScore(scoringWeights.busEffectiveTravelDistance, "bus effective travel distance rate", ::calculateBusEffectiveTravelDist, false)
+            val busTransferRate = computeScore(scoringWeights.busTransferRate, "bus transfer rate", ::calculateTransfersRate, false)
 
-            scoringWeights.serviceCoverage * serviceCoverage +
+            scoringWeights.transitRouteRatio * transitRouteRatio +
+                    scoringWeights.serviceCoverage * serviceCoverage +
                     scoringWeights.ridership * ridership +
                     scoringWeights.onTimePerf * onTimePerf +
                     scoringWeights.travelTime * travelTime +
                     scoringWeights.transitAutoTimeRatio * travelTimeRatio +
                     scoringWeights.productivity * productivity +
                     scoringWeights.busEfficiency * busEfficiency +
-                    scoringWeights.busEffectiveTravelDistance * busEffectiveTravelDist
+                    scoringWeights.busEffectiveTravelDistance * busEffectiveTravelDist +
+                    scoringWeights.busTransferRate * busTransferRate
         }
         logger.info("MATSim data processing & Score calculation completed in $time")
         logger.info("System-wide score: %.4f".format(score))

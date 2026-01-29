@@ -19,16 +19,38 @@ object MATSimMetadataStore {
             ?: throw IllegalStateException("Metadata not initialized. Call build() first.")
 
     private fun getNetworkBoundary(net: Network): NetworkBoundaries
-            = net.nodes.values.let {
-        NetworkBoundaries(
-            minX = it.minOf { node -> node.coord.x },
-            minY = it.minOf { node -> node.coord.y },
-            maxX = it.maxOf { node -> node.coord.x },
-            maxY = it.maxOf { node -> node.coord.y },
-        )
+        = net.nodes.values.let {
+            NetworkBoundaries(
+                minX = it.minOf { node -> node.coord.x },
+                minY = it.minOf { node -> node.coord.y },
+                maxX = it.maxOf { node -> node.coord.x },
+                maxY = it.maxOf { node -> node.coord.y },
+            )
+        }
+
+    private fun extractTransitRouteRatios(
+        net: Network,
+        schedule: TransitSchedule,
+        modeFilter: List<String>
+    ): Double {
+        val linkMap = net.links
+        val totalLinkLen = net.links.values.sumOf { it.length }
+        val coveredLinkLen = schedule.transitLines
+            .filter { (_, line) ->
+                line.routes.values.any { route ->
+                    modeFilter.any { mode -> "${route.transportMode}" == mode }
+                }
+            }
+            .values.flatMap { line ->
+                line.routes.values.flatMap { it.route.linkIds }
+            }
+            .distinct()
+            .sumOf { linkId -> linkMap[linkId]?.length ?: 0.0 }
+
+        return coveredLinkLen / totalLinkLen
     }
 
-    private fun extractCoverage(
+    private fun extractServiceCoverage(
         net: Network,
         radius: Double,
         plan: Population,
@@ -104,7 +126,8 @@ object MATSimMetadataStore {
 
         _metadata = MATSimMetadata(
             totalPopulation = plan.persons.size,
-            serviceCoverage = extractCoverage(net, radius, plan, schedule, modeFilter),
+            transitRouteRatios = extractTransitRouteRatios(net, schedule, modeFilter),
+            serviceCoverage = extractServiceCoverage(net, radius, plan, schedule, modeFilter),
             bus = bus.map { it.id }.toSet(),
             blacklist = blacklist.map { it.id }.toSet(),
             linkLength = net.links.mapValues { (_, link) -> link.length / 1000.0 },

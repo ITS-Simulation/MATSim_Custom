@@ -1,5 +1,6 @@
 package com.thomas.pt.db
 
+import org.duckdb.DuckDBArray
 import org.duckdb.DuckDBConnection
 import org.jetbrains.kotlinx.dataframe.AnyFrame
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
@@ -11,11 +12,16 @@ class DuckDBManager : AutoCloseable {
         DriverManager.getConnection("jdbc:duckdb:") as DuckDBConnection
 
     private fun ResultSet.toDataFrame(): AnyFrame {
-        val meta = metaData
-        val colNames = (1..meta.columnCount).map { meta.getColumnName(it) }
+        val colNames = (1..metaData.columnCount).map { metaData.getColumnName(it) }
         val rows = mutableListOf<Map<String, Any?>>()
         while (next()) {
-            rows.add(colNames.associateWith { getObject(it) })
+            rows.add(
+                colNames.associateWith { col ->
+                    val value = getObject(col)
+                    value.takeIf { it !is DuckDBArray }
+                        ?: ((value as DuckDBArray).array as Array<*>).toList()
+                }
+            )
         }
         return rows.toDataFrame()
     }
@@ -27,7 +33,6 @@ class DuckDBManager : AutoCloseable {
         }
     }
 
-    @Suppress("unused")
     fun query(sql: String): AnyFrame {
         val stmt = conn.createStatement()
         val rs = stmt.executeQuery(sql)
