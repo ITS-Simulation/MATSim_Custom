@@ -102,13 +102,14 @@ object MATSimMetadataStore {
         require(!::_metadata.isInitialized) { "Metadata is already initialized" }
 
         // Extract headway tolerance and coverage radius
-        val (radius, earlyHeadwayTolerance, lateHeadwayTolerance, travelTimeBaseline)
+        val (radius, earlyHeadwayTolerance, lateHeadwayTolerance, travelTimeBaseline, productivityBaseline)
             = Utility.getYamlSubconfig(yamlConfig, "scoring", "params").let {
                 arrayOf(
                     it["coverage_radius"] as Double,
                     it["early_headway_tolerance"] as Double,
                     it["late_headway_tolerance"] as Double,
                     it["travel_time_baseline"] as Double,
+                    it["productivity_baseline"] as Double,
                 )
             }
 
@@ -134,6 +135,7 @@ object MATSimMetadataStore {
             earlyHeadwayTolerance = earlyHeadwayTolerance,
             lateHeadwayTolerance = lateHeadwayTolerance,
             travelTimeBaseline = travelTimeBaseline,
+            productivityBaseline = productivityBaseline
         )
     }
 }

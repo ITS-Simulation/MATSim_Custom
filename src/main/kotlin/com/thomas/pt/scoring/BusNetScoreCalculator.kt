@@ -184,7 +184,7 @@ class BusNetScoreCalculator(
     )
 
     private fun calculateProductivity(): Double = exp(
-        -db.queryScalar(
+        -metadata.productivityBaseline * db.queryScalar(
             """
                 WITH total_service_hours AS (
                     SELECT 
@@ -228,7 +228,7 @@ class BusNetScoreCalculator(
         """.trimIndent()
     )
 
-    private fun computeScore(
+    private inline fun computeScore(
         weight: Double,
         scoreName: String,
         calculator: () -> Double,

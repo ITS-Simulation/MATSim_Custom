@@ -13,5 +13,6 @@ data class MATSimMetadata(
     val blacklist: Set<Id<Vehicle>>,
     val earlyHeadwayTolerance: Double,
     val lateHeadwayTolerance: Double,
+    val productivityBaseline: Double,
     val travelTimeBaseline: Double,
 )
