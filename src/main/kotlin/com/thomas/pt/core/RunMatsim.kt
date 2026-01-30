@@ -63,17 +63,21 @@ object RunMatsim {
     fun loadConfig(configFile: Path): Config = ConfigUtils.loadConfig(configFile.toString())
 
     fun simpleRun(configPath: Path) {
-        val config = loadConfig(configPath)
+        logger.info("Running simple MATSim executor module")
+        val time = measureTime {
+            val config = loadConfig(configPath)
 
-        config.controller().apply {
-            overwriteFileSetting = OverwriteFileSetting.deleteDirectoryIfExists
+            config.controller().apply {
+                overwriteFileSetting = OverwriteFileSetting.deleteDirectoryIfExists
 
-            val parentDir = configPath.toAbsolutePath().normalize().parent
-            outputDirectory = "${parentDir.resolve(outputDirectory)}"
+                val parentDir = configPath.toAbsolutePath().normalize().parent
+                outputDirectory = "${parentDir.resolve(outputDirectory)}"
+            }
+
+            val scenario = ScenarioUtils.loadScenario(config)
+            Controler(scenario).run()
         }
-
-        val controller = Controler(ScenarioUtils.loadScenario(config))
-        controller.run()
+        logger.info("MATSim run completed in $time")
     }
 
     fun run(configPath: Path, matsimConfig: Path, log: Boolean, format: WriterFormat)

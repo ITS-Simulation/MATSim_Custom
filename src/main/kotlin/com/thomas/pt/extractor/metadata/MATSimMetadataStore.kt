@@ -18,15 +18,21 @@ object MATSimMetadataStore {
         get() = _metadata.takeIf { ::_metadata.isInitialized }
             ?: throw IllegalStateException("Metadata not initialized. Call build() first.")
 
-    private fun getNetworkBoundary(net: Network): NetworkBoundaries
-        = net.nodes.values.let {
-            NetworkBoundaries(
-                minX = it.minOf { node -> node.coord.x },
-                minY = it.minOf { node -> node.coord.y },
-                maxX = it.maxOf { node -> node.coord.x },
-                maxY = it.maxOf { node -> node.coord.y },
-            )
-        }
+    private fun getNetworkBoundary(
+        net: Network,
+        transitStops: Set<TransitStopFacility> = emptySet()
+    ): NetworkBoundaries {
+        val nodeCoords = net.nodes.values.map { it.coord }
+        val stopCoords = transitStops.map { it.coord }
+        val allCoords = nodeCoords + stopCoords
+
+        return NetworkBoundaries(
+            minX = allCoords.minOf { it.x } - 1.0,
+            minY = allCoords.minOf { it.y } - 1.0,
+            maxX = allCoords.maxOf { it.x } + 1.0,
+            maxY = allCoords.maxOf { it.y } + 1.0,
+        )
+    }
 
     private fun extractTransitRouteRatios(
         net: Network,
@@ -80,7 +86,7 @@ object MATSimMetadataStore {
                 }
             }.toSet()
 
-        val qt = getNetworkBoundary(net).genQuadTree<TransitStopFacility>()
+        val qt = getNetworkBoundary(net, busStops).genQuadTree<TransitStopFacility>()
         busStops.forEach { stop ->
             qt.put(stop.coord.x, stop.coord.y, stop)
         }
