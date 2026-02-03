@@ -183,6 +183,7 @@ class BusNetScoreCalculator(
         )
     )
 
+    // TODO: Fix the calculation logic
     private fun calculateProductivity(): Double = exp(
         -metadata.productivityBaseline * db.queryScalar(
             """
