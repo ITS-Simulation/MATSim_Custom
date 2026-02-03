@@ -69,7 +69,7 @@ jobs:
         with:
           repository: ITS-Simulation/MATSim_Distributed_Runner
           ref: i7
-          token: ${{ secrets.RUNNER_REPO_PAT }}
+          token: ${{ secrets.MATSIM_RUNNER_PAT }}
           fetch-depth: 0
           
       - name: Configure git
