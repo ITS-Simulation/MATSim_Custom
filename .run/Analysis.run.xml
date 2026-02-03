@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="MainKt (Analysis)" type="JetRunConfigurationType">
+  <configuration default="false" name="Analysis" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
     <module name="Bus_MATSim.test" />
     <option name="PROGRAM_PARAMETERS" value="analysis --cfg=data/config/test_config.yaml --matsim-cfg=sim/baseline/config.xml --events=sim/baseline/matsim/output_events.xml.gz --out=data/out/score.bin --signature=Thomas" />

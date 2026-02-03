@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="MainKt" type="JetRunConfigurationType" nameIsGenerated="true">
+  <configuration default="false" name="ArrowConverter" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
     <module name="Bus_MATSim.main" />
-    <option name="PROGRAM_PARAMETERS" value="sim --cfg=data/config/test_config.yaml --matsim-cfg=sim/sioux/config.xml --out=data/out/score.bin --signature=Thomas" />
+    <option name="PROGRAM_PARAMETERS" value="arrow -f data/temp/bus_delay_records.arrow --signature=Thomas" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="--add-opens=java.base/java.nio=ALL-UNNAMED" />
     <method v="2">

@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.*
 import com.thomas.pt.core.Analysis
+import com.thomas.pt.core.ArrowToCSV
 import com.thomas.pt.core.SimpleMATSimRunner
 import com.thomas.pt.core.Simulation
 
@@ -13,5 +14,5 @@ class MATSimApp: CliktCommand() {
 }
 
 fun main(args: Array<String>) = MATSimApp()
-    .subcommands(Simulation, Analysis, SimpleMATSimRunner)
+    .subcommands(Simulation, Analysis, SimpleMATSimRunner, ArrowToCSV)
     .main(args)
