@@ -64,11 +64,10 @@ jobs:
     needs: build-and-release
     
     steps:
-      - name: Checkout MATSim_Distributed_Runner (i7 branch)
+      - name: Checkout MATSim_Distributed_Runner
         uses: actions/checkout@v6
         with:
           repository: ITS-Simulation/MATSim_Distributed_Runner
-          ref: i7
           token: ${{ secrets.MATSIM_RUNNER_PAT }}
           fetch-depth: 0
           
@@ -77,8 +76,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-      - name: Update Dockerfile on i7 (main branch)
+      - name: Update Dockerfile on default branch
         run: |
+          # Get default branch
+          SOURCE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||')
+          echo "Default branch: $SOURCE_BRANCH"
+          
+          git checkout $SOURCE_BRANCH
           VERSION="v${{ needs.build-and-release.outputs.version }}"
           ZIP_NAME="dist-${{ needs.build-and-release.outputs.version }}.zip"
           sed -i "s/^ARG VERSION=.*/ARG VERSION=${VERSION}/" Dockerfile
@@ -86,16 +90,22 @@ jobs:
           sed -i "s/^ARG SHA256=.*/ARG SHA256=${{ needs.build-and-release.outputs.sha256 }}/" Dockerfile
           git add Dockerfile
           git diff --cached --quiet || git commit -m "feat: update to ${VERSION}"
-          git push origin i7
+          git push origin $SOURCE_BRANCH
           
       - name: Sync Dockerfile to all other branches
         run: |
-          BRANCHES=$(git branch -r | grep -v 'origin/i7$' | grep -v 'HEAD' | sed 's|origin/||' | xargs)
+          # Prune deleted remote branches
+          git fetch --prune
+          
+          # Get default branch
+          SOURCE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||')
+          # Use for-each-ref for reliable branch listing (excludes HEAD, origin symref)
+          BRANCHES=$(git for-each-ref --format='%(refname:strip=3)' refs/remotes/origin | grep -v "^$SOURCE_BRANCH$" | grep -v "^HEAD$")
           
           for BRANCH in $BRANCHES; do
             echo "Syncing to $BRANCH..."
             git checkout $BRANCH
-            git checkout i7 -- Dockerfile
+            git checkout $SOURCE_BRANCH -- Dockerfile
             git add Dockerfile
             git diff --cached --quiet || git commit -m "feat: update to v${{ needs.build-and-release.outputs.version }}"
             git push origin $BRANCH
