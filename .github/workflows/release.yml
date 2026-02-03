@@ -90,7 +90,7 @@ jobs:
           
       - name: Sync Dockerfile to all other branches
         run: |
-          BRANCHES=$(git branch -r | grep -v 'origin/i7' | grep -v 'HEAD' | sed 's|origin/||' | xargs)
+          BRANCHES=$(git branch -r | grep -v 'origin/i7$' | grep -v 'HEAD' | sed 's|origin/||' | xargs)
           
           for BRANCH in $BRANCHES; do
             echo "Syncing to $BRANCH..."
