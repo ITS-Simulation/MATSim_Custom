@@ -76,40 +76,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-      - name: Update Dockerfile on default branch
+      - name: Update Dockerfile on main branch
         run: |
-          # Get default branch
-          SOURCE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||')
-          echo "Default branch: $SOURCE_BRANCH"
+          git checkout main
+          git pull origin main
           
-          git checkout $SOURCE_BRANCH
           VERSION="v${{ needs.build-and-release.outputs.version }}"
           ZIP_NAME="dist-${{ needs.build-and-release.outputs.version }}.zip"
+          
           sed -i "s/^ARG VERSION=.*/ARG VERSION=${VERSION}/" Dockerfile
           sed -i "s/^ARG ZIP=.*/ARG ZIP=${ZIP_NAME}/" Dockerfile
           sed -i "s/^ARG SHA256=.*/ARG SHA256=${{ needs.build-and-release.outputs.sha256 }}/" Dockerfile
+          
           git add Dockerfile
           git diff --cached --quiet || git commit -m "feat: update to ${VERSION}"
-          git push origin $SOURCE_BRANCH
           
-      - name: Sync Dockerfile to all other branches
-        run: |
-          # Prune deleted remote branches
-          git fetch --prune
+          git push origin main
           
-          # Get default branch
-          SOURCE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||')
-          # Use for-each-ref for reliable branch listing (excludes HEAD, origin symref)
-          BRANCHES=$(git for-each-ref --format='%(refname:strip=3)' refs/remotes/origin | grep -v "^$SOURCE_BRANCH$" | grep -v "^HEAD$")
-          
-          for BRANCH in $BRANCHES; do
-            echo "Syncing to $BRANCH..."
-            git checkout $BRANCH
-            git checkout $SOURCE_BRANCH -- Dockerfile
-            git add Dockerfile
-            git diff --cached --quiet || git commit -m "feat: update to v${{ needs.build-and-release.outputs.version }}"
-            git push origin $BRANCH
-          done
-          
-          echo "✓ Dockerfile synced across all branches"
-
+          echo "✓ Dockerfile updated"
