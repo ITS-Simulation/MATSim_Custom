@@ -2,8 +2,10 @@ name: Auto Tag on Version Change
 
 on:
   push:
-    branches: [v2]
-    paths: ['build.gradle.kts']
+    branches: 
+      - v2
+    paths: 
+      - 'build.gradle.kts'
 
 permissions:
   contents: write
