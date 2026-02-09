@@ -2,7 +2,7 @@
   <configuration default="false" name="ArrowConverter" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
     <module name="Bus_MATSim.main" />
-    <option name="PROGRAM_PARAMETERS" value="arrow -f data/temp/bus_delay_records.arrow --signature=Thomas" />
+    <option name="PROGRAM_PARAMETERS" value="arrow -f data/temp/bus_delay_records.arrow -sig Thomas" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="--add-opens=java.base/java.nio=ALL-UNNAMED" />
     <method v="2">
