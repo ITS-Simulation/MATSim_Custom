@@ -59,11 +59,13 @@ abstract class ArrowBatchWriter<T>(
 
     override fun close() {
         try {
-            if (started) {
-                flush()
-                writer.end()
-                writer.close()
+            if (!started) {
+                allocateVectors(batchSize)
+                writer.start()
             }
+            flush()
+            writer.end()
+            writer.close()
         } finally {
             outputStream.close()
             root.close()

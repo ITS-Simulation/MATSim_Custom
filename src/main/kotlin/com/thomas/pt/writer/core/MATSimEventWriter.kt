@@ -26,10 +26,14 @@ class MATSimEventWriter(
     files: DataEndpoints,
     batchSize: Int,
     format: WriterFormat,
+    trackThroughput: Boolean
 ): AutoCloseable {
     companion object {
-        const val DEFAULT_CHANNEL_CAPACITY = 200_000
+        const val DEFAULT_CHANNEL_CAPACITY = 5_000
     }
+
+    private val throughputTracker: ChannelThroughputTracker? = 
+        if (trackThroughput) ChannelThroughputTracker() else null
 
     private val busPassengerDataChannel = Channel<BusPassengerData>(DEFAULT_CHANNEL_CAPACITY)
     private val busDelayChannel = Channel<BusDelayData>(DEFAULT_CHANNEL_CAPACITY)
@@ -99,7 +103,12 @@ class MATSimEventWriter(
     fun pushBusTripData(item: BusTripData): Boolean
         = busTripDataChannel.trySend(item).isSuccess
 
+    fun recordThroughput(simTime: Double, channelName: String)
+        = throughputTracker?.recordEvent(simTime, channelName)
+
     override fun close() {
+        throughputTracker?.logMaxThroughput()
+
         busPassengerDataChannel.close()
         busDelayChannel.close()
         busTripDataChannel.close()

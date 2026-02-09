@@ -116,6 +116,9 @@ class BusNetScoreCalculator(
 
     override fun close() = db.close()
 
+    private fun isDataSourceEmpty(dataSource: String): Boolean 
+        = db.queryScalar("SELECT COUNT(*) FROM $dataSource") == 0.0
+
     private fun calculateRidership(): Double = db.queryScalar(
         "SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords"
     ) / metadata.totalPopulation
@@ -183,7 +186,6 @@ class BusNetScoreCalculator(
         )
     )
 
-    // TODO: Fix the calculation logic
     private fun calculateProductivity(): Double = exp(
         -metadata.productivityBaseline * db.queryScalar(
             """
@@ -233,17 +235,24 @@ class BusNetScoreCalculator(
         weight: Double,
         scoreName: String,
         calculator: () -> Double,
-        logOriginal: Boolean = true
+        logOriginal: Boolean,
+        vararg requiredDataSources: String
     ): Double =
         if (weight > 0) {
-            logger.info("Calculating {}...", scoreName)
-            val score = try { calculator() } catch (e: Exception) {
-                logger.error("Error calculating {}: {}", scoreName, e.message)
-                exitProcess(1)
+            val emptyDataSources = requiredDataSources.filter { isDataSourceEmpty(it) }
+            if (emptyDataSources.isNotEmpty()) {
+                logger.warn("Skipping {} calculation: no events recorded", scoreName)
+                0.0
+            } else {
+                logger.info("Calculating {}...", scoreName)
+                val score = try { calculator() } catch (e: Exception) {
+                    logger.error("Error calculating {}: {}", scoreName, e.message)
+                    exitProcess(1)
+                }
+                if (logOriginal) logger.info("Calculated {}: {}", scoreName, "%.4f".format(score))
+                else logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
+                score
             }
-            if (logOriginal) logger.info("Calculated {}: {}", scoreName, "%.4f".format(score))
-            else logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
-            score
         } else 0.0
 
     fun calculateScore(out: File) {
@@ -258,14 +267,46 @@ class BusNetScoreCalculator(
             val transitRouteRatio = metadata.transitRouteRatios
             logger.info("Calculated transit route ratio: {}%", "%.4f".format(transitRouteRatio * 100))
 
-            val ridership = computeScore(scoringWeights.ridership, "ridership", ::calculateRidership, false)
-            val onTimePerf = computeScore(scoringWeights.onTimePerf, "on-time performance", ::calculateOnTimePerf, false)
-            val travelTimeRatio = computeScore(scoringWeights.transitAutoTimeRatio, "transit-auto travel time ratio", ::calculateTravelTimeRatio)
-            val travelTime = computeScore(scoringWeights.travelTime, "travel time", ::calculateTravelTime)
-            val productivity = computeScore(scoringWeights.productivity, "productivity", ::calculateProductivity)
-            val busEfficiency = computeScore(scoringWeights.busEfficiency, "bus efficiency", ::calculateBusEfficiency)
-            val busEffectiveTravelDist = computeScore(scoringWeights.busEffectiveTravelDistance, "bus effective travel distance rate", ::calculateBusEffectiveTravelDist, false)
-            val busTransferRate = computeScore(scoringWeights.busTransferRate, "bus transfer rate", ::calculateTransfersRate, false)
+            val ridership = computeScore(
+                scoringWeights.ridership,
+                "ridership", ::calculateRidership, false,
+                busPassengerRecords
+            )
+            val onTimePerf = computeScore(
+                scoringWeights.onTimePerf,
+                "on-time performance", ::calculateOnTimePerf, false,
+                busDelayRecords
+            )
+            val travelTimeRatio = computeScore(
+                scoringWeights.transitAutoTimeRatio,
+                "transit-auto travel time ratio", ::calculateTravelTimeRatio, true,
+                tripRecords
+            )
+            val travelTime = computeScore(
+                scoringWeights.travelTime,
+                "travel time", ::calculateTravelTime, true,
+                tripRecords
+            )
+            val productivity = computeScore(
+                scoringWeights.productivity,
+                "productivity", ::calculateProductivity, true,
+                busTripRecords, busPassengerRecords
+            )
+            val busEfficiency = computeScore(
+                scoringWeights.busEfficiency,
+                "bus efficiency", ::calculateBusEfficiency, true,
+                busTripRecords, busPassengerRecords
+            )
+            val busEffectiveTravelDist = computeScore(
+                scoringWeights.busEffectiveTravelDistance,
+                "bus effective travel distance rate", ::calculateBusEffectiveTravelDist, false,
+                busTripRecords
+            )
+            val busTransferRate = computeScore(
+                scoringWeights.busTransferRate,
+                "bus transfer rate", ::calculateTransfersRate, false,
+                tripRecords
+            )
 
             scoringWeights.transitRouteRatio * transitRouteRatio +
                     scoringWeights.serviceCoverage * serviceCoverage +
