@@ -29,7 +29,7 @@ class MATSimEventWriter(
     trackThroughput: Boolean
 ): AutoCloseable {
     companion object {
-        const val DEFAULT_CHANNEL_CAPACITY = 5_000
+        const val DEFAULT_CHANNEL_CAPACITY = 50_000
     }
 
     private val throughputTracker: ChannelThroughputTracker? = 
