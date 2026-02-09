@@ -80,10 +80,10 @@ object RunMatsim {
         logger.info("MATSim run completed in $time")
     }
 
-    fun run(configPath: Path, matsimConfig: Path, log: Boolean, format: WriterFormat)
-        = run(Utility.loadYaml(configPath), matsimConfig, log, format)
+    fun run(configPath: Path, matsimConfig: Path, log: Boolean, format: WriterFormat, trackThroughput: Boolean)
+        = run(Utility.loadYaml(configPath), matsimConfig, log, format, trackThroughput)
 
-    fun run(yamlConfig: Map<String, Any>, matsimConfigPath: Path, log: Boolean, format: WriterFormat) {
+    fun run(yamlConfig: Map<String, Any>, matsimConfigPath: Path, log: Boolean, format: WriterFormat, trackThroughput: Boolean) {
         logger.info("Running MATSim core module")
 
         val (matsim, loadTime) = measureTimedValue {
@@ -133,7 +133,8 @@ object RunMatsim {
                 tripDataFile = dataOutConfig["trip_records"] as String,
                 busTripDataFile = dataOutConfig["bus_trip_records"] as String,
             ),
-            format = format
+            format = format,
+            trackThroughput = trackThroughput
         ).use { writer ->
             val busPassengerHandler = BusPassengerHandler(lastIteration, writer)
             val busDelayHandler = BusDelayHandler(lastIteration, writer)

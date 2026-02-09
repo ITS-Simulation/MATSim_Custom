@@ -11,17 +11,17 @@ import java.io.File
 import java.net.InetAddress
 
 object SimpleMATSimRunner: CliktCommand(name = "simple-run") {
-    val config by option("--matsim-cfg").path(
+    val config by option("-mc", "--matsim-cfg").path(
         mustExist = true,
         mustBeReadable = true,
         canBeDir = false
     ).required().help("MATSim config file")
 
-    val logFile: File by option("--log-file").file(
+    val logFile: File by option("-lf", "--log-file").file(
         canBeDir = false
     ).default(File("logs/app.log")).help("Log file")
 
-    val signature: String by option("--signature")
+    val signature: String by option("-sig", "--signature")
         .default(
             try { InetAddress.getLocalHost().hostName }
             catch (_: Exception) {

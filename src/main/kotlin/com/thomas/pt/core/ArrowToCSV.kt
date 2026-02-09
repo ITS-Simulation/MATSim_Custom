@@ -20,17 +20,17 @@ object ArrowToCSV: CliktCommand(name = "arrow") {
         mustExist = true,
         mustBeReadable = true,
         canBeDir = false
-    ).required().help("MATSim config file")
+    ).required().help("Arrow dataset file")
 
     val output by option("-o", "--output").file(
         canBeDir = false
     ).help("Output CSV file")
 
-    val logFile: File by option("--log-file").file(
+    val logFile: File by option("-lf", "--log-file").file(
         canBeDir = false
     ).default(File("logs/app.log")).help("Log file")
 
-    val signature: String by option("--signature")
+    val signature: String by option("-sig", "--signature")
         .default(
             try { InetAddress.getLocalHost().hostName }
             catch (_: Exception) {

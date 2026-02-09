@@ -2,6 +2,7 @@ package com.thomas.pt.core
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -36,38 +37,38 @@ import kotlin.time.measureTime
 object Analysis: CliktCommand(name = "analysis") {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    val yaml: Path by option("--cfg").path(
+    val yaml: Path by option("-c", "--cfg").path(
         mustExist = true,
         mustBeReadable = true,
         canBeDir = false
     ).required().help("YAML configuration file")
 
-    val matsim: Path by option("--matsim-cfg").path(
+    val matsim: Path by option("-mc", "--matsim-cfg").path(
         mustExist = true,
         mustBeReadable = true,
         canBeDir = false
     ).required().help("MATSim configuration file")
 
-    val events: File by option("--events").file(
+    val events: File by option("-e", "--events").file(
         mustExist = true,
         mustBeReadable = true,
         canBeDir = false
     ).required().help("MATSim XML Event file")
 
-    val output: File by option("--out").file(
+    val output: File by option("-o", "--out").file(
         canBeDir = false
     ).required().help("Score output file")
 
-    val format by option("--format")
+    val format by option("-f", "--format")
         .enum<WriterFormat>()
         .default(WriterFormat.CSV)
         .help("Output file format")
 
-    val logFile: File by option("--log-file").file(
+    val logFile: File by option("-lf", "--log-file").file(
         canBeDir = false
     ).default(File("logs/app.log")).help("Log file")
 
-    val signature: String by option("--signature")
+    val signature: String by option("-sig", "--signature")
         .default(
             try { InetAddress.getLocalHost().hostName }
             catch (_: Exception) {
@@ -75,6 +76,10 @@ object Analysis: CliktCommand(name = "analysis") {
             }
         )
         .help("Log signature (default: hostname)")
+
+    val trackThroughput: Boolean by option("-wtrpt", "--write-throughput")
+        .flag("-nwtrpt", "--no-write-throughput", default = false, defaultForHelp = "Disabled")
+        .help("Enable channel throughput tracking")
 
     override fun run() {
         System.setProperty("log.file", logFile.absolutePath)
@@ -101,6 +106,7 @@ object Analysis: CliktCommand(name = "analysis") {
                 ),
                 batchSize = batchConfig,
                 format = format,
+                trackThroughput = trackThroughput
             ).use { writer ->
                 val metadata = MATSimMetadataStore.metadata
                 val bus = metadata.bus.map(Id<Vehicle>::toString).toSet()

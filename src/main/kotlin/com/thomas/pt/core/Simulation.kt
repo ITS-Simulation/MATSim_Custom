@@ -23,31 +23,31 @@ import kotlin.time.measureTime
 object Simulation: CliktCommand(name = "sim") {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    val yaml: Path by option("--cfg").path(
+    val yaml: Path by option("-c", "--cfg").path(
         mustExist = true,
         mustBeReadable = true,
         canBeDir = false
     ).required().help("YAML configuration file")
 
-    val matsim: Path by option("--matsim-cfg").path(
+    val matsim: Path by option("-mc", "--matsim-cfg").path(
         mustExist = true,
         mustBeReadable = true,
         canBeDir = false
     ).required().help("MATSim configuration file")
 
-    val output: File by option("--out").file(
+    val output: File by option("-o", "--out").file(
         canBeDir = false
     ).required().help("Score output file")
 
-    val logFile: File by option("--log-file").file(
+    val logFile: File by option("-lf", "--log-file").file(
         canBeDir = false
     ).default(File("logs/app.log")).help("Log file")
 
-    val log: Boolean by option("--matsim-log")
+    val log: Boolean by option("-msl", "--matsim-log")
         .flag("--no-matsim-log", default = false, defaultForHelp = "Disabled")
         .help("Toggle MATSim logging")
 
-    val signature: String by option("--signature")
+    val signature: String by option("-sig", "--signature")
         .default(
             try { InetAddress.getLocalHost().hostName }
             catch (_: Exception) {
@@ -56,10 +56,14 @@ object Simulation: CliktCommand(name = "sim") {
         )
         .help("Log signature (default: hostname)")
 
-    val format by option("--format")
+    val format by option("-f", "--format")
         .enum<WriterFormat>()
         .default(WriterFormat.ARROW)
         .help("Output file format")
+
+    val trackThroughput: Boolean by option("-wtrpt", "--write-throughput")
+        .flag("-nwtrpt", "--no-write-throughput", default = false, defaultForHelp = "Disabled")
+        .help("Enable channel throughput tracking")
 
     override fun run() {
         System.setProperty("log.file", logFile.absolutePath)
@@ -73,7 +77,7 @@ object Simulation: CliktCommand(name = "sim") {
 
         try {
             val t1 = measureTime {
-                RunMatsim.run(yaml, matsim, log, format)
+                RunMatsim.run(yaml, matsim, log, format, trackThroughput)
             }
             logger.info("Run time: $t1")
 
