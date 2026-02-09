@@ -63,16 +63,7 @@ object MATSimMetadataStore {
         schedule: TransitSchedule,
         modeFilter: List<String>
     ): Double {
-        // Get total population and population home
-        val totalPop = plan.persons.size.toDouble()
         var popCoveredWithBus = 0
-        val popHome: List<Coord> = plan.persons.values.map { person ->
-            person.selectedPlan
-                .planElements
-                .filterIsInstance<Activity>()
-                .first { it.type == "home" }
-                .coord
-        }
 
         val busStops = schedule.transitLines
             .filter { (_, line) ->
@@ -86,16 +77,27 @@ object MATSimMetadataStore {
                 }
             }.toSet()
 
-        val qt = getNetworkBoundary(net, busStops).genQuadTree<TransitStopFacility>()
-        busStops.forEach { stop ->
-            qt.put(stop.coord.x, stop.coord.y, stop)
-        }
-        popHome.forEach { home ->
-            qt.getDisk(home.x, home.y, radius)
-                .isNotEmpty().let { if (it) popCoveredWithBus++ }
-        }
+        getNetworkBoundary(net, busStops)
+            .genQuadTree<TransitStopFacility>()
+            .apply {
+                busStops.forEach { stop ->
+                    put(stop.coord.x, stop.coord.y, stop)
+                }
+                plan.persons.values
+                    .map { person ->
+                        person.selectedPlan
+                            .planElements
+                            .filterIsInstance<Activity>()
+                            .first { it.type == "home" }
+                            .coord
+                    }.forEach { home ->
+                        getDisk(home.x, home.y, radius)
+                            .isNotEmpty().let { if (it) popCoveredWithBus++ }
+                    }
+            }
 
-        return popCoveredWithBus / totalPop
+
+        return popCoveredWithBus / plan.persons.size.toDouble()
     }
 
     fun build(
