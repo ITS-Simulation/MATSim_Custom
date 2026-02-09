@@ -123,6 +123,7 @@ class BusNetScoreCalculator(
         "SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords"
     ) / metadata.totalPopulation
 
+    // TODO: fix transfer rate calculation
     private fun calculateTransfersRate(): Double {
         val busList = metadata.bus.map { it.toString() }.toSet()
         val tripsRecords = db.query(
