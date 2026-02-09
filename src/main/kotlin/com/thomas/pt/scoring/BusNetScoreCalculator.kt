@@ -4,8 +4,7 @@ import com.thomas.pt.db.DuckDBManager
 import com.thomas.pt.extractor.metadata.MATSimMetadataStore
 import com.thomas.pt.utils.Utility
 import com.thomas.pt.writer.core.WriterFormat
-import org.jetbrains.kotlinx.dataframe.api.add
-import org.jetbrains.kotlinx.dataframe.api.sum
+import org.jetbrains.kotlinx.dataframe.api.count
 import org.slf4j.LoggerFactory
 import java.io.DataOutputStream
 import java.io.File
@@ -123,20 +122,19 @@ class BusNetScoreCalculator(
         "SELECT COUNT(DISTINCT person_id) FROM $busPassengerRecords"
     ) / metadata.totalPopulation
 
-    // TODO: fix transfer rate calculation
     private fun calculateTransfersRate(): Double {
         val busList = metadata.bus.map { it.toString() }.toSet()
         val tripsRecords = db.query(
             "SELECT veh_list FROM $tripRecords WHERE main_mode = 'pt'"
         )
-        tripsRecords.add("transfer") {
+        return tripsRecords.count {
             val vehList = "veh_list"<List<String>>()
-            vehList.zipWithNext().count { (prev, next) ->
+            vehList.zipWithNext().any { (prev, next) ->
                 (prev in busList) && (next in busList)
             }
-        }.sum("transfer").toDouble().let { totalTransfers ->
+        }.toDouble().let { tripsWithTransfers ->
             val totalTrips = tripsRecords.rowsCount()
-            return if (totalTrips > 0) totalTransfers * 1.0 / totalTrips else Double.NaN
+            if (totalTrips > 0) tripsWithTransfers / totalTrips else Double.NaN
         }
     }
 
