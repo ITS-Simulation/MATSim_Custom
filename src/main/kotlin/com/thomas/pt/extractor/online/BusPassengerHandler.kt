@@ -51,6 +51,7 @@ class BusPassengerHandler(
                 )
             )
         )
+        writer.recordThroughput(event.time, "BusPassengerData")
     }
 
     override fun handleEvent(event: VehicleLeavesTrafficEvent) {

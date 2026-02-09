@@ -76,6 +76,7 @@ class TripHandler(
                 )
             )
         )
+        writer.recordThroughput(event.time, "TripData")
     }
 
     override fun reset(iteration: Int) {

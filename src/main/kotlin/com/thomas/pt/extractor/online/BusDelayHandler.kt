@@ -47,6 +47,7 @@ class BusDelayHandler(
                 )
             )
         )
+        writer.recordThroughput(event.time, "BusDelayData")
 
         busMap.remove(event.vehicleId)
     }

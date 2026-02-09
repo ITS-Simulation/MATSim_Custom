@@ -119,6 +119,7 @@ class BusTripHandler(
                 )
             )
         )
+        writer.recordThroughput(event.time, "BusTripData")
     }
 
     override fun handleEvent(event: VehicleLeavesTrafficEvent) {
@@ -139,6 +140,7 @@ class BusTripHandler(
                 )
             )
         )
+        writer.recordThroughput(event.time, "BusTripData")
         vehDriverMap.remove(event.vehicleId)
     }
 
