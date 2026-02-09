@@ -2,7 +2,7 @@
   <configuration default="false" name="SimpleRunner" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
     <module name="Bus_MATSim.main" />
-    <option name="PROGRAM_PARAMETERS" value="simple-run --matsim-cfg=sim/sioux/config.xml --signature=Thomas" />
+    <option name="PROGRAM_PARAMETERS" value="simple-run --matsim-cfg=sim/bus_sim/cottbus-with-pt/config1.xml --signature=Thomas" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="--add-opens=java.base/java.nio=ALL-UNNAMED" />
     <method v="2">
