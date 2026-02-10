@@ -4,7 +4,13 @@ import com.thomas.pt.db.DuckDBManager
 import com.thomas.pt.extractor.metadata.MATSimMetadataStore
 import com.thomas.pt.utils.Utility
 import com.thomas.pt.writer.core.WriterFormat
+import kotlinx.serialization.json.Json
+import org.apache.arrow.vector.ipc.JsonFileReader
 import org.jetbrains.kotlinx.dataframe.api.count
+import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
+import org.jetbrains.kotlinx.dataframe.api.toDataFrame
+import org.jetbrains.kotlinx.dataframe.io.JSON
+import org.jetbrains.kotlinx.dataframe.io.writeJson
 import org.slf4j.LoggerFactory
 import java.io.DataOutputStream
 import java.io.File
@@ -134,7 +140,7 @@ class BusNetScoreCalculator(
             }
         }.toDouble().let { tripsWithTransfers ->
             val totalTrips = tripsRecords.rowsCount()
-            if (totalTrips > 0) tripsWithTransfers / totalTrips else Double.NaN
+            if (totalTrips > 0) (1 - tripsWithTransfers / totalTrips) else Double.NaN
         }
     }
 
@@ -237,7 +243,7 @@ class BusNetScoreCalculator(
         logOriginal: Boolean,
         vararg requiredDataSources: String
     ): Double =
-        if (weight > 0) {
+        if (weight > 0 || weight == Double.NEGATIVE_INFINITY) {
             val emptyDataSources = requiredDataSources.filter { isDataSourceEmpty(it) }
             if (emptyDataSources.isNotEmpty()) {
                 logger.warn("Skipping {} calculation: no events recorded", scoreName)
@@ -248,13 +254,13 @@ class BusNetScoreCalculator(
                     logger.error("Error calculating {}: {}", scoreName, e.message)
                     exitProcess(1)
                 }
-                if (logOriginal) logger.info("Calculated {}: {}", scoreName, "%.4f".format(score))
+                if (logOriginal) logger.info("Calculated {} score: {}", scoreName, "%.4f".format(score))
                 else logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
                 score
             }
         } else 0.0
 
-    fun calculateScore(out: File) {
+    fun calculateScore(out: File, scoreRecords: File? = null) {
         val (score, time) = measureTimedValue {
             logger.info("Processing MATSim event data...")
 
@@ -267,47 +273,47 @@ class BusNetScoreCalculator(
             logger.info("Calculated transit route ratio: {}%", "%.4f".format(transitRouteRatio * 100))
 
             val ridership = computeScore(
-                scoringWeights.ridership,
+                if (scoreRecords == null) scoringWeights.ridership else Double.NEGATIVE_INFINITY,
                 "ridership", ::calculateRidership, false,
                 busPassengerRecords
             )
             val onTimePerf = computeScore(
-                scoringWeights.onTimePerf,
+                if (scoreRecords == null) scoringWeights.onTimePerf else Double.NEGATIVE_INFINITY,
                 "on-time performance", ::calculateOnTimePerf, false,
                 busDelayRecords
             )
             val travelTimeRatio = computeScore(
-                scoringWeights.transitAutoTimeRatio,
+                if (scoreRecords == null) scoringWeights.transitAutoTimeRatio else Double.NEGATIVE_INFINITY,
                 "transit-auto travel time ratio", ::calculateTravelTimeRatio, true,
                 tripRecords
             )
             val travelTime = computeScore(
-                scoringWeights.travelTime,
+                if (scoreRecords == null) scoringWeights.travelTime else Double.NEGATIVE_INFINITY,
                 "travel time", ::calculateTravelTime, true,
                 tripRecords
             )
             val productivity = computeScore(
-                scoringWeights.productivity,
+                if (scoreRecords == null) scoringWeights.productivity else Double.NEGATIVE_INFINITY,
                 "productivity", ::calculateProductivity, true,
                 busTripRecords, busPassengerRecords
             )
             val busEfficiency = computeScore(
-                scoringWeights.busEfficiency,
+                if (scoreRecords == null) scoringWeights.busEfficiency else Double.NEGATIVE_INFINITY,
                 "bus efficiency", ::calculateBusEfficiency, true,
                 busTripRecords, busPassengerRecords
             )
             val busEffectiveTravelDist = computeScore(
-                scoringWeights.busEffectiveTravelDistance,
+                if (scoreRecords == null) scoringWeights.busEffectiveTravelDistance else Double.NEGATIVE_INFINITY,
                 "bus effective travel distance rate", ::calculateBusEffectiveTravelDist, false,
                 busTripRecords
             )
             val busTransferRate = computeScore(
-                scoringWeights.busTransferRate,
-                "bus transfer rate", ::calculateTransfersRate, false,
+                if (scoreRecords == null) scoringWeights.busTransferRate else Double.NEGATIVE_INFINITY,
+                "bus transfer rate", ::calculateTransfersRate, true,
                 tripRecords
             )
 
-            scoringWeights.transitRouteRatio * transitRouteRatio +
+            val finalScore = scoringWeights.transitRouteRatio * transitRouteRatio +
                     scoringWeights.serviceCoverage * serviceCoverage +
                     scoringWeights.ridership * ridership +
                     scoringWeights.onTimePerf * onTimePerf +
@@ -317,8 +323,30 @@ class BusNetScoreCalculator(
                     scoringWeights.busEfficiency * busEfficiency +
                     scoringWeights.busEffectiveTravelDistance * busEffectiveTravelDist +
                     scoringWeights.busTransferRate * busTransferRate
+
+            scoreRecords?.let {
+                assert(it.extension.lowercase() == "json") {
+                    "Score records output file must be in JSON format."
+                }
+                logger.info("Writing score records...")
+                ScoringRecords(
+                    transitRouteRatio = transitRouteRatio,
+                    serviceCoverage = serviceCoverage,
+                    ridership = ridership,
+                    travelTime = travelTime,
+                    transitAutoTimeRatio = travelTimeRatio,
+                    onTimePerf = onTimePerf,
+                    productivity = productivity,
+                    busEfficiency = busEfficiency,
+                    busEffectiveTravelDistance = busEffectiveTravelDist,
+                    busTransferRate = busTransferRate,
+                    finalScore = finalScore,
+                ).writeJson(it)
+                logger.info("Finished writing score records.")
+            }
+            finalScore
         }
-        logger.info("MATSim data processing & Score calculation completed in $time")
+        logger.info("MATSim data processing & Score Calculation completed in $time")
         logger.info("System-wide score: %.4f".format(score))
         DataOutputStream(out.outputStream()).use { it.writeDouble(score) }
     }

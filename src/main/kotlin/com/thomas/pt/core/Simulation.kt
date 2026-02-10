@@ -35,9 +35,13 @@ object Simulation: CliktCommand(name = "sim") {
         canBeDir = false
     ).required().help("MATSim configuration file")
 
-    val output: File by option("-o", "--out").file(
+    val score: File by option("-s", "--score").file(
         canBeDir = false
     ).required().help("Score output file")
+
+    val scoreRecords: File? by option("-sc", "--score-records").file(
+        canBeDir = false
+    ).help("Score records output file")
 
     val logFile: File by option("-lf", "--log-file").file(
         canBeDir = false
@@ -81,11 +85,11 @@ object Simulation: CliktCommand(name = "sim") {
             }
             logger.info("Run time: $t1")
 
-            output.absoluteFile.parentFile.mkdirs()
-            if (output.exists()) output.delete()
+            score.absoluteFile.parentFile.mkdirs()
+            if (score.exists()) score.delete()
 
-            BusNetScoreCalculator(yaml, format).calculateScore(output)
-            output.setReadOnly()
+            BusNetScoreCalculator(yaml, format).calculateScore(score, scoreRecords)
+            score.setReadOnly()
         } catch (e: Exception) {
             logger.error("Pipeline failed with a fatal error: ${e.message}", e)
             exitProcess(1)

@@ -55,7 +55,7 @@ object Analysis: CliktCommand(name = "analysis") {
         canBeDir = false
     ).required().help("MATSim XML Event file")
 
-    val output: File by option("-o", "--out").file(
+    val score: File by option("-s", "--score").file(
         canBeDir = false
     ).required().help("Score output file")
 
@@ -134,11 +134,11 @@ object Analysis: CliktCommand(name = "analysis") {
                 logger.info("Event parsing completed in $parseTime")
             }
 
-            output.absoluteFile.parentFile.mkdirs()
-            if (output.exists()) output.delete()
+            score.absoluteFile.parentFile.mkdirs()
+            if (score.exists()) score.delete()
 
-            BusNetScoreCalculator(yaml, format).calculateScore(output)
-            output.setReadOnly()
+            BusNetScoreCalculator(yaml, format).calculateScore(score)
+            score.setReadOnly()
         } catch (e: Exception) {
              logger.error("Analysis pipeline failed with a fatal error: ${e.message}", e)
             exitProcess(1)
