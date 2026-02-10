@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.thomas"
-version = "2.12.5"
+version = "2.13.0"
 
 repositories {
     maven("https://repo.osgeo.org/repository/release/")
@@ -31,6 +31,7 @@ dependencies {
     implementation("org.apache.arrow:arrow-memory:18.3.0")
     implementation("org.apache.arrow:arrow-memory-netty:18.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("com.github.ajalt.clikt:clikt:5.0.3")
     implementation("org.duckdb:duckdb_jdbc:1.4.3.0")
     implementation("org.kobjects.ktxml:core:1.0.0")
