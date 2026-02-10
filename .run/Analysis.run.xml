@@ -2,7 +2,7 @@
   <configuration default="false" name="Analysis" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
     <module name="Bus_MATSim.test" />
-    <option name="PROGRAM_PARAMETERS" value="analysis -c data/config/test_config.yaml -mc sim/baseline/config.xml -e sim/baseline/matsim/output_events.xml.gz -o data/out/score.bin -sig Thomas" />
+    <option name="PROGRAM_PARAMETERS" value="analysis -c data/config/test_config.yaml -mc sim/baseline/config.xml -e sim/baseline/matsim/output_events.xml.gz -s data/out/score.bin -sig Thomas" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="--add-opens=java.base/java.nio=ALL-UNNAMED" />
     <method v="2">

@@ -2,7 +2,7 @@
   <configuration default="false" name="ScoringRunner" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
     <module name="Bus_MATSim.main" />
-    <option name="PROGRAM_PARAMETERS" value="sim -c data/config/config.yaml -mc sim/bus_sim/cottbus-with-pt/config1.xml -o data/out/score.bin -sig Thomas" />
+    <option name="PROGRAM_PARAMETERS" value="sim -c data/config/config.yaml -mc sim/test/config.xml -s data/out/score.bin -sig Thomas -sc data/out/score_records.json" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="--add-opens=java.base/java.nio=ALL-UNNAMED" />
     <method v="2">
