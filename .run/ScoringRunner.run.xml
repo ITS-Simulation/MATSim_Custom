@@ -1,10 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ScoringRunner" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
-    <module name="Bus_MATSim.main" />
-    <option name="PROGRAM_PARAMETERS" value="sim -c data/config/config.yaml -mc sim/test/config.xml -s data/out/score.bin -sig Thomas -sc data/out/score_records.json" />
+    <module name="MATSim_Bus_Optimizer.main" />
+    <option name="PROGRAM_PARAMETERS" value="sim -c data/config/config.yaml -mc sim/bus_sim/cottbus-with-pt/config1.xml -s data/out/score.bin -sc data/out/score_records.json" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="--add-opens=java.base/java.nio=ALL-UNNAMED" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

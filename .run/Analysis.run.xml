@@ -1,10 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Analysis" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.thomas.pt.MainKt" />
-    <module name="Bus_MATSim.test" />
+    <module name="MATSim_Bus_Optimizer.main" />
     <option name="PROGRAM_PARAMETERS" value="analysis -c data/config/test_config.yaml -mc sim/baseline/config.xml -e sim/baseline/matsim/output_events.xml.gz -s data/out/score.bin -sig Thomas" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="--add-opens=java.base/java.nio=ALL-UNNAMED" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
