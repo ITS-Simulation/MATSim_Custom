@@ -3,11 +3,11 @@ plugins {
     kotlin("jvm") version kotlinVer
     kotlin("plugin.serialization") version kotlinVer
     application
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "9.3.1"
 }
 
 group = "com.thomas"
-version = "2.13.0"
+version = "2.15.0"
 
 repositories {
     maven("https://repo.osgeo.org/repository/release/")

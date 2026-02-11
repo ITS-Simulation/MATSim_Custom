@@ -34,6 +34,7 @@ data class ScoringRecords(
         private val json = Json {
             prettyPrint = true
             prettyPrintIndent = "  "
+            allowSpecialFloatingPointValues = true
         }
     }
     fun writeJson(out: File) = out.writeText(
