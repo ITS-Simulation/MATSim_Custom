@@ -4,13 +4,6 @@ import com.thomas.pt.db.DuckDBManager
 import com.thomas.pt.extractor.metadata.MATSimMetadataStore
 import com.thomas.pt.utils.Utility
 import com.thomas.pt.writer.core.WriterFormat
-import kotlinx.serialization.json.Json
-import org.apache.arrow.vector.ipc.JsonFileReader
-import org.jetbrains.kotlinx.dataframe.api.count
-import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
-import org.jetbrains.kotlinx.dataframe.api.toDataFrame
-import org.jetbrains.kotlinx.dataframe.io.JSON
-import org.jetbrains.kotlinx.dataframe.io.writeJson
 import org.slf4j.LoggerFactory
 import java.io.DataOutputStream
 import java.io.File
@@ -129,19 +122,30 @@ class BusNetScoreCalculator(
     ) / metadata.totalPopulation
 
     private fun calculateTransfersRate(): Double {
-        val busList = metadata.bus.map { it.toString() }.toSet()
-        val tripsRecords = db.query(
-            "SELECT veh_list FROM $tripRecords WHERE main_mode = 'pt'"
+        val busList = metadata.bus.joinToString(", ") { "'${it.toString().replace("'", "''")}'" }
+        return db.queryScalar(
+            """
+                WITH pt_trips AS (
+                    SELECT veh_list FROM $tripRecords WHERE main_mode = 'pt'
+                ),
+                trip_count AS (
+                    SELECT COUNT(*) AS total FROM pt_trips
+                ),
+                transfer_check AS (
+                    SELECT list_bool_or(
+                        [
+                            veh_list[i] IN ($busList) AND veh_list[i+1] IN ($busList)
+                            FOR i IN range(1, len(veh_list))
+                        ]
+                    ) AS has_transfer
+                    FROM pt_trips
+                    WHERE len(veh_list) >= 2
+                )
+                SELECT
+                    1.0 - COUNT_IF(has_transfer) * 1.0 / NULLIF((SELECT COUNT(*) FROM pt_trips), 0) AS transfer_rate
+                FROM transfer_check
+            """.trimIndent()
         )
-        return tripsRecords.count {
-            val vehList = "veh_list"<List<String>>()
-            vehList.zipWithNext().any { (prev, next) ->
-                (prev in busList) && (next in busList)
-            }
-        }.toDouble().let { tripsWithTransfers ->
-            val totalTrips = tripsRecords.rowsCount()
-            if (totalTrips > 0) (1 - tripsWithTransfers / totalTrips) else Double.NaN
-        }
     }
 
     @Suppress("unused")
@@ -251,7 +255,7 @@ class BusNetScoreCalculator(
             } else {
                 logger.info("Calculating {}...", scoreName)
                 val score = try { calculator() } catch (e: Exception) {
-                    logger.error("Error calculating {}: {}", scoreName, e.message)
+                    logger.error("Error calculating {}\n{}", scoreName, e.message)
                     exitProcess(1)
                 }
                 if (logOriginal) logger.info("Calculated {} score: {}", scoreName, "%.4f".format(score))
