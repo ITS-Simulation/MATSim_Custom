@@ -3,7 +3,6 @@ package com.thomas.pt
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
-import com.github.ajalt.clikt.parameters.options.*
 import com.thomas.pt.core.Analysis
 import com.thomas.pt.core.ArrowToCSV
 import com.thomas.pt.core.SimpleMATSimRunner

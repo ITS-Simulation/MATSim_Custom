@@ -3,14 +3,12 @@ package com.thomas.pt.extractor.metadata
 import com.thomas.pt.model.metadata.MATSimMetadata
 import com.thomas.pt.model.metadata.NetworkBoundaries
 import com.thomas.pt.utils.Utility
-import org.matsim.api.core.v01.Coord
 import org.matsim.api.core.v01.network.Network
 import org.matsim.api.core.v01.population.Activity
 import org.matsim.api.core.v01.population.Population
 import org.matsim.pt.transitSchedule.api.TransitSchedule
 import org.matsim.pt.transitSchedule.api.TransitStopFacility
 import org.matsim.vehicles.Vehicles
-import kotlin.collections.get
 
 object MATSimMetadataStore {
     private lateinit var _metadata: MATSimMetadata

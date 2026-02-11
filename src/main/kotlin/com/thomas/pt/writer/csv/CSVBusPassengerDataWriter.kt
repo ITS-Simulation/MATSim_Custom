@@ -1,6 +1,5 @@
 package com.thomas.pt.writer.csv
 
-import com.thomas.pt.model.data.BusDelayData
 import com.thomas.pt.model.data.BusPassengerData
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 import org.jetbrains.kotlinx.dataframe.io.writeCsv
