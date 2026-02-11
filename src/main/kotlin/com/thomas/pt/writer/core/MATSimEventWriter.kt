@@ -29,7 +29,8 @@ class MATSimEventWriter(
     trackThroughput: Boolean
 ): AutoCloseable {
     companion object {
-        const val DEFAULT_CHANNEL_CAPACITY = 50_000
+        // TODO: test on Linux systems for optimal channel capacity
+        const val DEFAULT_CHANNEL_CAPACITY = 1_000
     }
 
     private val throughputTracker: ChannelThroughputTracker? = 

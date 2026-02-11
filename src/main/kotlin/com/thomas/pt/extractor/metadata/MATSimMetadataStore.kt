@@ -20,15 +20,26 @@ object MATSimMetadataStore {
         net: Network,
         transitStops: Set<TransitStopFacility> = emptySet()
     ): NetworkBoundaries {
-        val nodeCoords = net.nodes.values.map { it.coord }
-        val stopCoords = transitStops.map { it.coord }
-        val allCoords = nodeCoords + stopCoords
+        var minX = Double.MAX_VALUE
+        var minY = Double.MAX_VALUE
+        var maxX = -Double.MAX_VALUE
+        var maxY = -Double.MAX_VALUE
+
+        fun update(x: Double, y: Double) {
+            if (x < minX) minX = x
+            if (x > maxX) maxX = x
+            if (y < minY) minY = y
+            if (y > maxY) maxY = y
+        }
+
+        net.nodes.values.forEach { update(it.coord.x, it.coord.y) }
+        transitStops.forEach { update(it.coord.x, it.coord.y) }
 
         return NetworkBoundaries(
-            minX = allCoords.minOf { it.x } - 1.0,
-            minY = allCoords.minOf { it.y } - 1.0,
-            maxX = allCoords.maxOf { it.x } + 1.0,
-            maxY = allCoords.maxOf { it.y } + 1.0,
+            minX = minX - 1.0,
+            minY = minY - 1.0,
+            maxX = maxX + 1.0,
+            maxY = maxY + 1.0,
         )
     }
 
@@ -39,14 +50,14 @@ object MATSimMetadataStore {
     ): Double {
         val linkMap = net.links
         val totalLinkLen = net.links.values.sumOf { it.length }
-        val coveredLinkLen = schedule.transitLines
-            .filter { (_, line) ->
+        val coveredLinkLen = schedule.transitLines.values.asSequence()
+            .filter { line ->
                 line.routes.values.any { route ->
                     modeFilter.any { mode -> "${route.transportMode}" == mode }
                 }
             }
-            .values.flatMap { line ->
-                line.routes.values.flatMap { it.route.linkIds }
+            .flatMap { line ->
+                line.routes.values.asSequence().flatMap { it.route.linkIds.asSequence() }
             }
             .distinct()
             .sumOf { linkId -> linkMap[linkId]?.length ?: 0.0 }
@@ -63,15 +74,15 @@ object MATSimMetadataStore {
     ): Double {
         var popCoveredWithBus = 0
 
-        val busStops = schedule.transitLines
-            .filter { (_, line) ->
+        val busStops = schedule.transitLines.values.asSequence()
+            .filter { line ->
                 line.routes.values.any { route ->
                     modeFilter.any { mode -> "${route.transportMode}" == mode }
                 }
             }
-            .values.flatMap { line ->
-                line.routes.values.flatMap { route ->
-                    route.stops.map { it.stopFacility }
+            .flatMap { line ->
+                line.routes.values.asSequence().flatMap { route ->
+                    route.stops.asSequence().map { it.stopFacility }
                 }
             }.toSet()
 
@@ -137,7 +148,7 @@ object MATSimMetadataStore {
             serviceCoverage = extractServiceCoverage(net, radius, plan, schedule, modeFilter),
             bus = bus.map { it.id }.toSet(),
             blacklist = blacklist.map { it.id }.toSet(),
-            linkLength = net.links.mapValues { (_, link) -> link.length / 1000.0 },
+            linkLength = net.links.entries.associate { it.key.toString() to (it.value.length / 1000.0) },
             earlyHeadwayTolerance = earlyHeadwayTolerance,
             lateHeadwayTolerance = lateHeadwayTolerance,
             travelTimeBaseline = travelTimeBaseline,

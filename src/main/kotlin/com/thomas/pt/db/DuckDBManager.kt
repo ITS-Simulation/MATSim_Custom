@@ -14,11 +14,12 @@ class DuckDBManager : AutoCloseable {
         }
     }
 
-    fun queryScalar(sql: String): Double {
-        val stmt = conn.createStatement()
-        val rs = stmt.executeQuery(sql)
-        return if (rs.next()) rs.getDouble(1) else 0.0
-    }
+    fun queryScalar(sql: String): Double
+        = conn.createStatement().use { stmt ->
+            stmt.executeQuery(sql).use { rs ->
+                if (rs.next()) rs.getDouble(1) else 0.0
+            }
+        }
 
     override fun close() = conn.close()
 }

@@ -47,11 +47,8 @@ class TripExtractor(
         val vehicleId = attrs["vehicle"] ?: return
         
         if (personId.startsWith("pt")) return
-        val existing = tripMap[personId] ?: return
-        
-        tripMap[personId] = existing.copy(
-            vehList = existing.vehList + vehicleId
-        )
+
+        (tripMap[personId]?.vehList as MutableList<String>).add(vehicleId)
     }
     
     private fun handleActStart(time: Double, attrs: Map<String, String>) {

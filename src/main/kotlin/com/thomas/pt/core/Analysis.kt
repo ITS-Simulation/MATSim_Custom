@@ -111,12 +111,11 @@ object Analysis: CliktCommand(name = "analysis") {
                 val metadata = MATSimMetadataStore.metadata
                 val bus = metadata.bus.map(Id<Vehicle>::toString).toSet()
                 val blacklist = metadata.blacklist.map(Id<Vehicle>::toString).toSet()
-                val linkLengths = metadata.linkLength.mapKeys { it.key.toString() }
 
                 val busPassengerExtractor = BusPassengerExtractor(bus, writer)
                 val busDelayExtractor = BusDelayExtractor(bus, writer)
                 val tripExtractor = TripExtractor(blacklist, writer)
-                val busTripExtractor = BusTripExtractor(bus, linkLengths, writer)
+                val busTripExtractor = BusTripExtractor(bus, metadata.linkLength, writer)
 
                 val parser = OfflineEventParser(events)
 

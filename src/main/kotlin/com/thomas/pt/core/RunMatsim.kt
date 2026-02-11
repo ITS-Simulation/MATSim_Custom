@@ -12,6 +12,7 @@ import com.thomas.pt.writer.core.WriterFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.matsim.api.core.v01.Scenario
 import org.matsim.core.config.Config
 import org.matsim.core.config.ConfigUtils
 import org.matsim.core.config.groups.ControllerConfigGroup
@@ -36,24 +37,24 @@ object RunMatsim {
         matsim: Path,
     ): Duration {
         val config = loadConfig(matsim)
-        val controller = Controler(ScenarioUtils.loadScenario(config))
+        val scenario = ScenarioUtils.loadScenario(config)
         return extractMetadata(
             yamlConfig = Utility.loadYaml(yaml),
-            controller = controller
+            scenario = scenario
         )
     }
 
     private fun extractMetadata(
         yamlConfig: Map<String, Any>,
-        controller: Controler
+        scenario: Scenario
     ): Duration =
         measureTime {
             MATSimMetadataStore.build(
                 yamlConfig = yamlConfig,
-                net = controller.scenario.network,
-                plan = controller.scenario.population,
-                schedule = controller.scenario.transitSchedule,
-                transitVehicles = controller.scenario.transitVehicles,
+                net = scenario.network,
+                plan = scenario.population,
+                schedule = scenario.transitSchedule,
+                transitVehicles = scenario.transitVehicles,
             )
         }
 
@@ -113,12 +114,12 @@ object RunMatsim {
                 }
             }
 
-            Controler(ScenarioUtils.loadScenario(matsimConfig)) to lastIteration
+            ScenarioUtils.loadScenario(matsimConfig) to lastIteration
         }
         logger.info("MATSim scenario loaded in $loadTime")
-        val (controller, lastIteration) = matsim
+        val (scenario, lastIteration) = matsim
 
-        val metadataTime = extractMetadata(yamlConfig, controller)
+        val metadataTime = extractMetadata(yamlConfig, scenario)
         logger.info("MATSim metadata loaded in $metadataTime")
 
         val batchConfig = yamlConfig["batch_size"] as Int
@@ -136,6 +137,7 @@ object RunMatsim {
             format = format,
             trackThroughput = trackThroughput
         ).use { writer ->
+            val controller = Controler(scenario)
             val busPassengerHandler = BusPassengerHandler(lastIteration, writer)
             val busDelayHandler = BusDelayHandler(lastIteration, writer)
             val busTripHandler = BusTripHandler(lastIteration, writer)

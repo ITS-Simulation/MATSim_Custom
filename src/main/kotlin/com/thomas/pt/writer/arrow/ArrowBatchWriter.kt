@@ -52,8 +52,7 @@ abstract class ArrowBatchWriter<T>(
 
         root.rowCount = currIdx
         writer.writeBatch()
-        root.clear()
-        allocateVectors(batchSize)
+        root.fieldVectors.forEach { it.reset() }
         currIdx = 0
     }
 

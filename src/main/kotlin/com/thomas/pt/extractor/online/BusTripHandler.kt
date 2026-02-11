@@ -113,7 +113,7 @@ class BusTripHandler(
                 BusTripData(
                     busId = trip.busId.toString(),
                     linkId = trip.currentLinkId.toString(),
-                    linkLen = metadata.linkLength[trip.currentLinkId] ?: return,
+                    linkLen = metadata.linkLength[trip.currentLinkId.toString()] ?: return,
                     havePassenger = trip.passengers > 0,
                     travelTime = event.time - trip.enterTime
                 )
@@ -134,7 +134,7 @@ class BusTripHandler(
                 BusTripData(
                     busId = trip.busId.toString(),
                     linkId = trip.currentLinkId.toString(),
-                    linkLen = metadata.linkLength[trip.currentLinkId] ?: return,
+                    linkLen = metadata.linkLength[trip.currentLinkId.toString()] ?: return,
                     havePassenger = trip.passengers > 0,
                     travelTime = event.time - trip.enterTime
                 )

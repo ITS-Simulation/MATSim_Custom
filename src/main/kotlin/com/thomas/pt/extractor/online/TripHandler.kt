@@ -50,10 +50,7 @@ class TripHandler(
         if (event.personId !in tripMap) return
         if (event.personId.toString().startsWith("pt")) return // Ignore bus driver trips
 
-        val existingData = tripMap[event.personId]!!
-        tripMap[event.personId] = existingData.copy(
-            vehList = existingData.vehList + event.vehicleId.toString()
-        )
+        (tripMap[event.personId]!!.vehList as MutableList<String>).add(event.vehicleId.toString())
     }
 
     override fun handleEvent(event: ActivityStartEvent) {
