@@ -32,6 +32,7 @@ jobs:
             TAG="v${MAJOR}.${MINOR}.${PATCH}"
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
           
       - name: Check if tag exists
         id: check
@@ -41,11 +42,24 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Update README versions
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.full_version }}"
+          sed -i -E "s/dist-[0-9]+\.[0-9]+(\.[0-9]+)?\.jar/dist-${VERSION}.jar/g" README.md README_VI.md
           
-      - name: Create and push tag
+      - name: Commit and push changes
         if: steps.check.outputs.exists == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md README_VI.md
+          git diff --cached --quiet || git commit -m "docs: update README versions to ${{ steps.version.outputs.full_version }}"
+          git push origin v2
+          
+      - name: Create and push tag
+        if: steps.check.outputs.exists == 'false'
+        run: |
           git tag ${{ steps.version.outputs.tag }}
           git push origin ${{ steps.version.outputs.tag }}
