@@ -258,9 +258,14 @@ class BusNetScoreCalculator(
                     logger.error("Error calculating {}\n{}", scoreName, e.message)
                     exitProcess(1)
                 }
-                if (logOriginal) logger.info("Calculated {} score: {}", scoreName, "%.4f".format(score))
-                else logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
-                score
+                if (score.isFinite()) {
+                    if (logOriginal) logger.info("Calculated {} score: {}", scoreName, "%.4f".format(score))
+                    else logger.info("Calculated {}: {}%", scoreName, "%.4f".format(score * 100))
+                    score
+                } else {
+                    logger.warn("Invalid {} score (non-finite value)", scoreName)
+                    0.0
+                }
             }
         } else 0.0
 
