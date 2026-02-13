@@ -88,7 +88,7 @@ jobs:
             exit 0
           fi
           
-          echo "Demoting old latest ($OLD_SHA) → $OLD_TAG"
+          echo "Demoting old latest ($OLD_SHA) to $OLD_TAG"
           
           # --- Copy release assets from 'latest' to versioned release ---
           mkdir -p /tmp/release_assets
@@ -97,7 +97,9 @@ jobs:
           # --- Create detached commit with frozen README ---
           git checkout "$OLD_SHA"
           
-          sed -i -E "s|releases/tag/latest|releases/tag/${OLD_TAG}|g" README.md README_VI.md
+          # Replace dynamic badge with static version badge
+          STATIC_BADGE="[![Version](https://img.shields.io/badge/Release-${OLD_TAG}-blue?logo=github)](https://github.com/ITS-Simulation/MATSim-Bus-Optimizer/releases/tag/${OLD_TAG})"
+          sed -i "s|.*img.shields.io/github/v/release.*|${STATIC_BADGE}|" README.md README_VI.md
           sed -i -E "s/dist-[0-9]+\.[0-9]+(\.[0-9]+)?\.jar/dist-${OLD_VERSION}.jar/g" README.md README_VI.md
           
           git config user.name "github-actions[bot]"
