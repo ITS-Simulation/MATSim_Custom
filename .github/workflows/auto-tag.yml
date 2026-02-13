@@ -73,7 +73,7 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Demote old latest → fixed version
+      - name: Demote old latest to fixed version
         if: steps.check.outputs.processed == 'false' && steps.old_latest.outputs.exists == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
