@@ -33,35 +33,121 @@ jobs:
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
-          
-      - name: Check if tag exists
+
+      - name: Check if already processed
         id: check
         run: |
-          if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+          HEAD_SHA=$(git rev-parse HEAD)
+          if git rev-parse "latest" >/dev/null 2>&1; then
+            LATEST_SHA=$(git rev-list -n 1 latest)
+            if [ "$HEAD_SHA" = "$LATEST_SHA" ]; then
+              echo "processed=true" >> $GITHUB_OUTPUT
+            else
+              echo "processed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "processed=false" >> $GITHUB_OUTPUT
+          fi
+
+      # --- Step 1: Demote old 'latest' to a fixed versioned tag ---
+      - name: Get old latest info
+        if: steps.check.outputs.processed == 'false'
+        id: old_latest
+        run: |
+          if git rev-parse "latest" >/dev/null 2>&1; then
+            OLD_SHA=$(git rev-list -n 1 latest)
+            echo "sha=$OLD_SHA" >> $GITHUB_OUTPUT
             echo "exists=true" >> $GITHUB_OUTPUT
+            
+            # Extract old version from build.gradle.kts at that commit
+            OLD_FULL=$(git show ${OLD_SHA}:build.gradle.kts | grep -oP 'version\s*=\s*"\K[^"]+')
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$OLD_FULL"
+            if [ "$PATCH" = "0" ]; then
+              OLD_TAG="v${MAJOR}.${MINOR}"
+            else
+              OLD_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+            fi
+            echo "tag=$OLD_TAG" >> $GITHUB_OUTPUT
+            echo "full_version=$OLD_FULL" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update README versions
-        if: steps.check.outputs.exists == 'false'
+      - name: Demote old latest → fixed version
+        if: steps.check.outputs.processed == 'false' && steps.old_latest.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OLD_SHA="${{ steps.old_latest.outputs.sha }}"
+          OLD_TAG="${{ steps.old_latest.outputs.tag }}"
+          OLD_VERSION="${{ steps.old_latest.outputs.full_version }}"
+          
+          # Skip if versioned tag already exists (handles partial retries)
+          if git rev-parse "$OLD_TAG" >/dev/null 2>&1; then
+            echo "Tag $OLD_TAG already exists, skipping demotion"
+            exit 0
+          fi
+          
+          echo "Demoting old latest ($OLD_SHA) → $OLD_TAG"
+          
+          # --- Copy release assets from 'latest' to versioned release ---
+          mkdir -p /tmp/release_assets
+          gh release download latest -D /tmp/release_assets/ 2>/dev/null || echo "No existing release to copy"
+          
+          # --- Create detached commit with frozen README ---
+          git checkout "$OLD_SHA"
+          
+          sed -i -E "s|releases/tag/latest|releases/tag/${OLD_TAG}|g" README.md README_VI.md
+          sed -i -E "s/dist-[0-9]+\.[0-9]+(\.[0-9]+)?\.jar/dist-${OLD_VERSION}.jar/g" README.md README_VI.md
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md README_VI.md
+          git diff --cached --quiet || git commit -m "docs: freeze README for ${OLD_TAG}"
+          
+          # Create versioned tag on frozen commit
+          git tag "$OLD_TAG"
+          git push origin "$OLD_TAG"
+          
+          # Create versioned release with copied assets
+          if [ -n "$(ls /tmp/release_assets/ 2>/dev/null)" ]; then
+            gh release create "$OLD_TAG" /tmp/release_assets/* \
+              --title "MATSim Bus Optimizer ${OLD_TAG}" \
+              --notes "Frozen release for ${OLD_TAG}" \
+              --latest=false
+          fi
+          
+          # Delete old 'latest' release and tag
+          gh release delete latest --yes 2>/dev/null || true
+          git push origin :refs/tags/latest
+          git tag -d latest 2>/dev/null || true
+          
+          # Return to v2 branch
+          git checkout v2
+
+      # --- Step 2: Update v2 branch README (badge → latest, JAR → new version) ---
+      - name: Update README on v2 branch
+        if: steps.check.outputs.processed == 'false'
         run: |
           VERSION="${{ steps.version.outputs.full_version }}"
-          TAG="${{ steps.version.outputs.tag }}"
-          sed -i -E "s/dist-[0-9]+\.[0-9]+(\.[0-9]+)?\.jar/dist-${VERSION}.jar/g" README.md README_VI.md
-          sed -i -E "s|releases/tag/v[0-9]+\.[0-9]+(\.[0-9]+)?|releases/tag/${TAG}|g" README.md README_VI.md
           
-      - name: Commit and push changes
-        if: steps.check.outputs.exists == 'false'
+          # Badge always points to 'latest'
+          sed -i -E "s|releases/tag/v[0-9]+\.[0-9]+(\.[0-9]+)?|releases/tag/latest|g" README.md README_VI.md
+          # JAR filename reflects actual version
+          sed -i -E "s/dist-[0-9]+\.[0-9]+(\.[0-9]+)?\.jar/dist-${VERSION}.jar/g" README.md README_VI.md
+          
+      - name: Commit and push v2 branch
+        if: steps.check.outputs.processed == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md README_VI.md
           git diff --cached --quiet || git commit -m "docs: update README versions to ${{ steps.version.outputs.full_version }}"
           git push origin v2
-          
-      - name: Create and push tag
-        if: steps.check.outputs.exists == 'false'
+
+      # --- Step 3: Create 'latest' tag → triggers release.yml ---
+      - name: Create latest tag
+        if: steps.check.outputs.processed == 'false'
         run: |
-          git tag ${{ steps.version.outputs.tag }}
-          git push origin ${{ steps.version.outputs.tag }}
+          git tag latest
+          git push origin latest
