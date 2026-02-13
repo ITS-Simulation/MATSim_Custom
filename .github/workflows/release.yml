@@ -53,7 +53,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "MATSim Bus Optimizer v${{ steps.get_version.outputs.VERSION }}"
+          name: "v${{ steps.get_version.outputs.VERSION }}"
           tag_name: latest
           draft: false
           prerelease: false

@@ -112,7 +112,7 @@ jobs:
           # Create versioned release with copied assets
           if [ -n "$(ls /tmp/release_assets/ 2>/dev/null)" ]; then
             gh release create "$OLD_TAG" /tmp/release_assets/* \
-              --title "MATSim Bus Optimizer ${OLD_TAG}" \
+              --title "${OLD_TAG}" \
               --notes "Frozen release for ${OLD_TAG}" \
               --latest=false
           fi
