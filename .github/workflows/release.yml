@@ -47,9 +47,6 @@ jobs:
           cp data/config/config.yaml release_assets/
           zip -j dist-${{ steps.get_version.outputs.VERSION }}.zip release_assets/*
 
-      - name: Calculate SHA256
-        run: sha256sum dist-${{ steps.get_version.outputs.VERSION }}.zip > sha256sum.txt
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -59,8 +56,6 @@ jobs:
           prerelease: false
           make_latest: true
           generate_release_notes: true
-          files: |
-            dist-${{ steps.get_version.outputs.VERSION }}.zip
-            sha256sum.txt
+          files: dist-${{ steps.get_version.outputs.VERSION }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
