@@ -1,5 +1,5 @@
 [![Build and Release](https://github.com/ITS-Simulation/MATSim-Bus-Optimizer/actions/workflows/release.yml/badge.svg)](https://github.com/ITS-Simulation/MATSim-Bus-Optimizer/actions/workflows/release.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/ITS-Simulation/MATSim-Bus-Optimizer?label=Latest%20Release&logo=github&display_name=release)](https://github.com/ITS-Simulation/MATSim-Bus-Optimizer/releases/tag/latest)
+[![Version](https://img.shields.io/badge/Release-v2.15.5-blue?logo=github)](https://github.com/ITS-Simulation/MATSim-Bus-Optimizer/releases/tag/v2.15.5)
 
 # MATSim Bus Optimizer
 [🇻🇳 Tiếng Việt](README_VI.md)
