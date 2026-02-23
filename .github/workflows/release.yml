@@ -47,6 +47,12 @@ jobs:
           cp data/config/config.yaml release_assets/
           zip -j dist-${{ steps.get_version.outputs.VERSION }}.zip release_assets/*
 
+      - name: Delete existing 'latest' release and tag
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
