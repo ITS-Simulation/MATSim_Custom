@@ -49,7 +49,7 @@ Run the MATSim simulation and calculate scores immediately:
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.6.jar sim \
+  -jar build/libs/dist-2.15.7.jar sim \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
   --score data/out/final_scores.bin \
@@ -74,7 +74,7 @@ Runs the MATSim simulation **without** the post-processing scoring pipeline. Use
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.6.jar simple-run \
+  -jar build/libs/dist-2.15.7.jar simple-run \
   --matsim-cfg data/config/matsim_config.xml
 ```
 
@@ -88,7 +88,7 @@ Process an existing `output_events.xml.gz` file:
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.6.jar analysis \
+  -jar build/libs/dist-2.15.7.jar analysis \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
   --events data/out/output_events.xml.gz \
@@ -106,7 +106,7 @@ Convert an Arrow IPC data file to CSV:
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.6.jar arrow \
+  -jar build/libs/dist-2.15.7.jar arrow \
   --file data/temp/bus_pax_records.arrow \
   --output data/temp/bus_pax_records.csv
 ```
@@ -199,6 +199,6 @@ RUN apt-get update && apt-get install -y wget unzip \
     && wget https://github.com/duckdb/duckdb/releases/download/v1.1.2/duckdb_cli-linux-amd64.zip \
     && unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin
 RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
-COPY build/libs/dist-2.15.6.jar app.jar
+COPY build/libs/dist-2.15.7.jar app.jar
 ENTRYPOINT ["java", "--add-opens=java.base/java.nio=ALL-UNNAMED", "-jar", "app.jar"]
 ```
