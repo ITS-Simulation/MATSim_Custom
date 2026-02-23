@@ -6,9 +6,8 @@ plugins {
     id("com.gradleup.shadow") version "9.3.1"
 }
 
-// Happy Lunar New Year 2026!
 group = "com.thomas"
-version = "2.15.5"
+version = "2.15.6"
 
 repositories {
     maven("https://repo.osgeo.org/repository/release/")
