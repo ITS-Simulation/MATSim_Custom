@@ -120,6 +120,7 @@ java --add-opens=java.base/java.nio=ALL-UNNAMED \
 Mọi tham số vận hành được quản lý qua file YAML.
 
 ### Các Khối Chính
+*   **matsim**: Thiết lập cách hệ thống nhận diện các loại xe buýt trong mạng lưới MATSim. Bạn có thể thiết lập `bus_type` (tên loại xe được dùng trong cấu hình phương tiện giao thông) và `bus_transport_modes` (các chế độ vận tải cần lọc để tìm xe buýt).
 *   **batch_size**: Kích thước bộ đệm (số lượng event) trước khi ghi xuống đĩa. (Tinh chỉnh I/O).
 *   **files → data**: Các đường dẫn đến file dữ liệu. Hệ thống tự động gán đuôi file (`.arrow` / `.csv`) dựa trên tham số `--format`.
 *   **scoring → params**: Tham số kỹ thuật cho mô hình chấm điểm:
@@ -192,7 +193,7 @@ Bạn phải cài đặt sẵn extension `arrow` của DuckDB trong quá trình 
 ```dockerfile
 FROM azul/zulu-openjdk:21
 RUN apt-get update && apt-get install -y wget unzip \
-    && wget https://github.com/duckdb/duckdb/releases/download/v1.1.2/duckdb_cli-linux-amd64.zip \
+    && wget https://github.com/duckdb/duckdb/releases/download/v1.4.3/duckdb_cli-linux-amd64.zip \
     && unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin
 RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
 COPY build/libs/dist-2.15.7.jar app.jar

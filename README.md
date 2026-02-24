@@ -123,6 +123,7 @@ java --add-opens=java.base/java.nio=ALL-UNNAMED \
 The pipeline is controlled by a YAML config file. 
 
 ### Key Sections
+*   **matsim**: Specifies how buses are identified within the MATSim network. The `bus_type` defines the vehicle type names used in the transit schedule, and `bus_transport_modes` sets the transport modes to be filtered for bus detection.
 *   **batch_size**: Number of events to buffer before writing to disk (Performance tuning).
 *   **files → data**: Defines input/output paths. Auto-resolves extensions based on `--format` (e.g., adds `.arrow` or `.csv`).
 *   **scoring → params**: Scoring model parameters:
@@ -196,7 +197,7 @@ You must pre-install the DuckDB `arrow` extension during the image build to run 
 ```dockerfile
 FROM azul/zulu-openjdk:21
 RUN apt-get update && apt-get install -y wget unzip \
-    && wget https://github.com/duckdb/duckdb/releases/download/v1.1.2/duckdb_cli-linux-amd64.zip \
+    && wget https://github.com/duckdb/duckdb/releases/download/v1.4.3/duckdb_cli-linux-amd64.zip \
     && unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin
 RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
 COPY build/libs/dist-2.15.7.jar app.jar
