@@ -50,7 +50,7 @@ Thực thi mô phỏng và tính toán KPI thời gian thực:
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.7.jar sim \
+  -jar build/libs/dist-2.16.0.jar sim \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
   --score data/out/final_scores.bin \
@@ -75,7 +75,7 @@ Chạy MATSim thuần, bỏ qua bước tính điểm. Thường được dùng 
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.7.jar simple-run \
+  -jar build/libs/dist-2.16.0.jar simple-run \
   --matsim-cfg data/config/matsim_config.xml
 ```
 
@@ -88,7 +88,7 @@ Xử lý file sự kiện (`output_events.xml.gz`) từ một lần chạy trư�
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.7.jar analysis \
+  -jar build/libs/dist-2.16.0.jar analysis \
   --cfg data/config/config.yaml \
   --matsim-cfg data/config/matsim_config.xml \
   --events data/out/output_events.xml.gz \
@@ -105,7 +105,7 @@ Chuyển đổi file Arrow sang CSV:
 
 ```bash
 java --add-opens=java.base/java.nio=ALL-UNNAMED \
-  -jar build/libs/dist-2.15.7.jar arrow \
+  -jar build/libs/dist-2.16.0.jar arrow \
   --file data/temp/bus_pax_records.arrow \
   --output data/temp/bus_pax_records.csv
 ```
@@ -196,6 +196,6 @@ RUN apt-get update && apt-get install -y wget unzip \
     && wget https://github.com/duckdb/duckdb/releases/download/v1.4.3/duckdb_cli-linux-amd64.zip \
     && unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin
 RUN duckdb -c "INSTALL arrow FROM community; LOAD arrow;"
-COPY build/libs/dist-2.15.7.jar app.jar
+COPY build/libs/dist-2.16.0.jar app.jar
 ENTRYPOINT ["java", "--add-opens=java.base/java.nio=ALL-UNNAMED", "-jar", "app.jar"]
 ```
